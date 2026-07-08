@@ -1,0 +1,15 @@
+<svg viewBox="0 0 900 660" xmlns="http://www.w3.org/2000/svg">
+  <g transform="translate(322,30) scale(0.5)">
+    <path d="M 331.3 169.8 A 78 78 0 1 1 276.2 114.7" fill="none" stroke="#C96442" stroke-width="34" stroke-linecap="round"/>
+    <path d="M 312 126 L 268.8 136.3 L 280.4 93.7 Z" fill="#C96442"/>
+    <line x1="256" y1="270" x2="256" y2="328" stroke="#C96442" stroke-width="34" stroke-linecap="round"/>
+    <line x1="150" y1="342" x2="362" y2="342" stroke="#C96442" stroke-width="34" stroke-linecap="round"/>
+    <line x1="190" y1="398" x2="322" y2="398" stroke="#C96442" stroke-width="34" stroke-linecap="round"/>
+    <line x1="228" y1="454" x2="284" y2="454" stroke="#C96442" stroke-width="34" stroke-linecap="round"/>
+  </g>
+  <text x="450" y="440" text-anchor="middle" font-family="Lora, Georgia, serif"
+        font-size="96" font-weight="600" letter-spacing="-1"
+        fill="#F0EEE9">Grounded<tspan fill="#C96442">RAG</tspan></text>
+  <text x="450" y="520" text-anchor="middle" font-family="Lora, Georgia, serif"
+        font-size="36" font-style="italic" fill="#A8A49C">Answers you can verify.</text>
+</svg>

@@ -1,0 +1,91 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:is(.dark *));
+
+:root {
+  --bg: #f4f1ea;
+  --surface: #fbfaf7;
+  --surface-2: #efebe1;
+  --text: #1f1e1d;
+  --muted: #6e6a63;
+  --border: #e2dcd1;
+  --accent: #c96442;
+  --accent-soft: #f3e0d7;
+  --ok: #5e8c61;
+  --warn: #b0813c;
+  --danger: #a84b3f;
+  --shadow-card: 0 1px 3px rgb(0 0 0 / 0.06);
+}
+
+.dark {
+  --bg: #262624;
+  --surface: #30302e;
+  --surface-2: #3a3937;
+  --text: #f0eee9;
+  --muted: #a8a49c;
+  --border: #45433f;
+  --accent: #d97757;
+  --accent-soft: #4a342b;
+  --ok: #7fa982;
+  --warn: #c99a55;
+  --danger: #c46a5d;
+  --shadow-card: none;
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-text: var(--text);
+  --color-muted: var(--muted);
+  --color-border: var(--border);
+  --color-accent: var(--accent);
+  --color-accent-soft: var(--accent-soft);
+  --color-ok: var(--ok);
+  --color-warn: var(--warn);
+  --color-danger: var(--danger);
+
+  --font-sans: var(--font-inter);
+  --font-serif: var(--font-lora);
+  --font-mono: var(--font-jetbrains-mono);
+
+  --radius-card: 12px;
+  --radius-button: 8px;
+  --radius-bubble: 20px;
+
+  --animate-fade-slide-in: fade-slide-in 200ms ease-out;
+
+  @keyframes fade-slide-in {
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-bg text-text font-sans;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
