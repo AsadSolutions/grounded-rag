@@ -13,10 +13,10 @@ that's an explicit decision for Asad to make from these numbers.
 ## Results table
 
 | N docs | N chunks | Ingest docs/sec | Ingest chunks/sec | Cold BM25 rebuild (s) | Cold rebuild memory (MB) | Search p50 (ms) | Search p95 (ms) | Hit rate |
-|---|---|---|---|---|---|---|---|---|
-| 1000 | 2337 | 436.8 | 1020.8 | 0.197 | 99.9 | 5.44 | 8.23 | 100% |
-| 10000 | 23146 | 436.5 | 1010.2 | 1.897 | 910.7 | 34.50 | 41.65 | 100% |
-| 50000 | 115369 | 415.7 | 959.2 | 15.733 | 3813.8 | 167.15 | 229.29 | 100% |
+| ------ | -------- | --------------- | ----------------- | --------------------- | ------------------------ | --------------- | --------------- | -------- |
+| 1000   | 2337     | 436.8           | 1020.8            | 0.197                 | 99.9                     | 5.44            | 8.23            | 100%     |
+| 10000  | 23146    | 436.5           | 1010.2            | 1.897                 | 910.7                    | 34.50           | 41.65           | 100%     |
+| 50000  | 115369   | 415.7           | 959.2             | 15.733                | 3813.8                   | 167.15          | 229.29          | 100%     |
 
 ## What degrades, and why (observed, not guessed)
 
@@ -34,7 +34,7 @@ that's an explicit decision for Asad to make from these numbers.
 - **Cold rebuild memory scales roughly linearly with chunk count**, at a striking
   ~33–43 MB per 1000 chunks (99.9MB / 2337 chunks, 910.7MB / 23146 chunks, 3813.8MB /
   115369 chunks). At 115k chunks the in-process BM25 index + cached chunk texts for a
-  *single tenant* used **3.8GB of resident memory**. This is the concrete, measured case
+  _single tenant_ used **3.8GB of resident memory**. This is the concrete, measured case
   for the roadmap's own "After v1.0" item — replacing in-process BM25 with Qdrant sparse
   vectors — if any tenant is expected to reach tens of thousands of chunks.
 
@@ -42,7 +42,7 @@ that's an explicit decision for Asad to make from these numbers.
   5.44ms → 34.50ms → 167.15ms (roughly 31x for a 50x increase in corpus size — close to
   linear, not the sub-linear scaling you'd want from an index). The suspect, based on the
   code path, is `keyword_search`'s per-query BM25 scoring: it calls
-  `BM25Okapi.get_scores()` over the *entire* tenant corpus, then does a Python-level
+  `BM25Okapi.get_scores()` over the _entire_ tenant corpus, then does a Python-level
   `sorted()` over all of it, for every single query, regardless of k. That's O(corpus
   size) per query. Qdrant's own dense HNSW search is expected to be sub-linear and is not
   the likely cause; this wasn't independently isolated in this pass, so treat it as the
@@ -60,7 +60,7 @@ that's exactly when `rebuild_from_qdrant` runs. Fixed to page through the full r
 ## Methodology notes and caveats
 
 - **Hit rate at N=1000+ is 100%**, but was as low as 40-80% in small smoke tests (N=10).
-  This is *not* a retrieval-quality regression — the dense embedder used here produces
+  This is _not_ a retrieval-quality regression — the dense embedder used here produces
   meaningless random vectors (that's the point: it isolates the benchmark from OpenAI
   latency), so at small N, RRF fusion can occasionally let a randomly well-ranked
   irrelevant chunk edge out the correct one in the top-k blend. This is an artifact of

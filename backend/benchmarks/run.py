@@ -144,13 +144,9 @@ def run_benchmark(
         docs_per_sec = n_docs / ingest_seconds if ingest_seconds > 0 else float("inf")
         chunks_per_sec = n_chunks / ingest_seconds if ingest_seconds > 0 else float("inf")
 
-        keyword.forget_tenant(tenant_id)  # simulate a cold start before measuring the rebuild
+        keyword.forget_tenant(tenant_id) 
         cold_rebuild_seconds, cold_rebuild_rss_bytes = measure_cold_rebuild(tenant_id, client)
 
-        # The subprocess measurement above rebuilt the index in an isolated
-        # process; this process's own cache is still cold. Warm it here,
-        # unmeasured, so the latency loop below times steady-state queries
-        # rather than paying a rebuild on its first iteration.
         keyword.rebuild_from_qdrant(tenant_id, client=client)
 
         rng = random.Random(seed)
@@ -158,10 +154,6 @@ def run_benchmark(
         latencies_ms = []
         hits = 0
         for doc in sampled_docs:
-            # No trailing punctuation directly after fact_id: BM25 tokenizes
-            # on whitespace only, so "{fact_id}?" would not match the clean
-            # "{fact_id}" token stored in the corpus and would silently fall
-            # back to weak generic-word overlap instead of the exact match.
             query_text = f"Tell me about fact identifier {doc.fact_id}"
             start = time.perf_counter()
             results = hybrid_search(tenant_id, query_text, k=6, client=client, embed_fn=embed_fn)

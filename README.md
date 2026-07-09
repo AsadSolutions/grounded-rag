@@ -107,6 +107,10 @@ Reproduce with one command:
 cd backend && python -m app.eval.run
 ```
 
+## Performance
+
+Measured, not assumed. Ingestion sustains roughly 430 documents per second flat from 1,000 to 50,000 documents. Hybrid search serves p95 under 10ms at 1,000 documents and under 45ms at 10,000, covering the realistic multi tenant document QA range with headroom. At 50,000 documents in a single tenant (115k chunks) the in process BM25 index becomes the ceiling, at 3.8GB memory and roughly 230ms p95, which is why the roadmap's next architectural step is Qdrant sparse vectors replacing in process BM25. Full methodology and results in [`backend/benchmarks/RESULTS.md`](backend/benchmarks/RESULTS.md). The benchmark also caught a pagination bug in cold index rebuilds before release, which is the point of having one.
+
 ## Quickstart
 
 **Prerequisites:** Python 3.11+, Node 20+, Docker, an OpenAI API key.

@@ -1,5 +1,3 @@
-"""Graph wiring only — no retrieval or LLM logic lives here (CLAUDE.md rule 6)."""
-
 from langgraph.graph import END, StateGraph
 
 from app.graph.nodes import (

@@ -43,10 +43,14 @@ export default function RootLayout({
       data-scroll-behavior="smooth"
       suppressHydrationWarning
     >
-      <head>
-        <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
-      </head>
       <body className="min-h-full flex flex-col antialiased">
+        <div
+          suppressHydrationWarning
+          style={{ display: "contents" }}
+          dangerouslySetInnerHTML={{
+            __html: `<script id="theme-init">${THEME_INIT_SCRIPT}</script>`,
+          }}
+        />
         <ThemeProvider>
           <ToastProvider>
             <ScratchTenantProvider>

@@ -75,9 +75,6 @@ def seed_demo_tenants(
             )
             ingested += 1
 
-        # Rebuilding once here (rather than relying only on ingest_document's
-        # per-file incremental rebuild) is what makes the in-process BM25
-        # index correct even in a run where every file was skipped.
         keyword.rebuild_from_qdrant(tenant_id, client=client)
         summary[tenant_id] = {"ingested": ingested, "skipped": skipped}
 

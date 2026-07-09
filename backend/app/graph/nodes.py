@@ -1,6 +1,5 @@
 """Graph nodes: pure functions of GraphState.
 
-Every node returns a full GraphState (never a raw dict — CLAUDE.md rule 3).
 The real OpenAI/search calls are injected as keyword-only args with real
 defaults, so nodes are directly unit-testable with fake data and
 app.graph.build wires the real implementations together for production.

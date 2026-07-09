@@ -1,9 +1,3 @@
-"""Settings loaded from environment variables, populated from .env if present.
-
-No third party dotenv dependency is in the locked requirements, so .env
-parsing is done inline here rather than pulling in a new package mid task.
-"""
-
 import os
 from dataclasses import dataclass
 from functools import lru_cache
