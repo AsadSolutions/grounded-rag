@@ -1,0 +1,166 @@
+{
+  "question_id": "multi-01",
+  "question": "What device security requirements apply when handling Privileged client information remotely, and how often does IT Security check devices for compliance?",
+  "tenant_id": "demo-acme-legal",
+  "category": "multi_chunk",
+  "unanswerable": false,
+  "correction_on": {
+    "answer": "When handling Privileged client information remotely, the security requirements that apply include the following: laptops must have full-disk encryption enabled, and multi-factor authentication must be configured on all accounts with access to Confidential or Privileged client information, in accordance with the Client Confidentiality Policy, POL-2210. \n\nIT Security checks devices for compliance on a quarterly basis. If devices are found to be out of compliance, they are remotely locked until the issue is resolved [05a00d68-ad51-4ea6-91e8-ea36cfd6a0f3].",
+    "retrieved_chunks_passed_to_judge": [
+      {
+        "chunk_id": "05a00d68-ad51-4ea6-91e8-ea36cfd6a0f3",
+        "doc_name": "remote-work-policy.md",
+        "score": 0.03252247488101534,
+        "text": " laptops must have full-disk encryption enabled and multi-factor authentication configured on all accounts with access to Confidential or Privileged client information, consistent with the Client Confidentiality Policy, POL-2210. IT Security conducts a quarterly compliance check of remote devices; devices found out of compliance are remotely locked until the issue is resolved.\n\n## Working from outside the country\n\nEmployees who wish to work remotely from outside the country for more than 5 consecutive business days must submit a request to Human Resources at least 10 business days in advance. Requests are reviewed jointly by Human Resources and IT Security to confirm that data residency, export control, and client confidentiality obligations can still be met from the proposed location. Some jurisdictions are excluded from approval due to legal or security constraints; the current exclusion list is maintained by IT Security and available on request.\n\n## Shared and public workspaces\n\nEmployees working from a shared or public workspace, such as a co-working space or coffee shop, must use a privacy screen when viewing Confidential or Privileged material and must not conduct client calls where the conversation could reasonably be overheard. Printing client documents in a shared workspace is prohibited.\n\n## Office access for remote employees\n\nRemote employees retain full badge access to both firm offices and are encouraged to reserve a desk in advance through the firm's scheduling system when planning an in-office day, particularly during weeks with high office occupancy.\n\n## Non-compliance\n\nRepeated failure to meet the 3-day in-office minimum without supervising partner approval, or a security compliance failure identified during a quarterly device check, may result in suspension of remote work privileges, reviewed by Human Resources on a case-by-case basis.\n\n## Cross-references\n\n- See POL-2210, Client Confidentiality Policy, for encryption and access control requirements.\n- See POL-2260, Expense Reimbursement Policy, for how the equipment stipend is claimed.\n- See POL-2201, Engagement and Billing Policy, for recording time worked outside core hours.\n\n## Questions\n\nQuestions about hybrid scheduling should go to your supervising partner. Questions about VPN, encryption, or device compliance should go to IT Security."
+      },
+      {
+        "chunk_id": "6e4e34b1-5539-4797-aae6-2ec47814cf50",
+        "doc_name": "remote-work-policy.md",
+        "score": 0.032266458495966696,
+        "text": "# Remote Work Policy\n\n**Policy number:** POL-2250\n**Applies to:** All non-partner employees of Acme Legal Partners LLP\n**Effective date:** March 1, 2022\n**Owner:** Human Resources, in coordination with IT Security\n\n## Purpose\n\nThis policy sets the standard hybrid work arrangement for Acme Legal Partners LLP, the security requirements for working outside a firm office, and the equipment support available to remote employees. Partners are not subject to the in-office day requirement but must still comply with the security requirements below whenever accessing firm systems remotely.\n\n## Hybrid work requirement\n\nNon-partner employees are required to work a minimum of 3 days per week from a firm office, either Meridian City or Port Callahan. The remaining days may be worked remotely, subject to supervising partner approval and client coverage needs. Supervising partners set specific in-office days for their teams to support collaboration on active matters; employees should confirm their team's schedule with their supervising partner.\n\n## Core collaboration hours\n\nRegardless of remote or in-office status, all employees are expected to be available during core collaboration hours of 10:00 a.m. to 4:00 p.m. local time, Monday through Friday. Meetings involving multiple timekeepers should be scheduled within core hours whenever possible. Employees working outside standard business hours to meet a client deadline should record that time consistent with the Engagement and Billing Policy, POL-2201.\n\n## Equipment and stipend\n\nThe firm provides a home office equipment stipend of $500 per year to employees who regularly work remotely. The stipend may be used for items such as a monitor, chair, or docking station and is reimbursed through the standard expense process described in the Expense Reimbursement Policy, POL-2260. All primary work must be performed on a firm-issued laptop; personal computers may not be used to access firm systems or client data.\n\n## Security requirements\n\nEvery remote connection to firm systems must go through the firm-managed VPN. Split-tunneling or other configurations that route firm traffic outside the VPN are prohibited. Firm-issued laptops must have full-disk encryption enabled and multi-factor authentication configured on all accounts with access to Confidential or Privileged client information, consistent with the Client Confidentiality Policy, POL-2210. IT Security conducts a quarterly compliance check of remote devices; devices found out of compliance are remotely locked until the issue is resolved.\n\n## Working from outside the country\n\nEmployees who wish to"
+      },
+      {
+        "chunk_id": "f4fb55cc-6b2f-4be1-9170-8efb91a4d302",
+        "doc_name": "client-confidentiality-policy.md",
+        "score": 0.03200204813108039,
+        "text": " active wall quarterly to confirm it remains necessary.\n\n## Non-disclosure agreements\n\nEvery contract staff member, temporary paralegal, and third-party vendor who will have access to Confidential or Privileged client data must sign a non-disclosure agreement before receiving system access. NDAs are administered by Human Resources and filed with the Records Department. Vendors providing services such as document review, e-discovery, or court reporting are contractually bound to the same confidentiality standards as firm employees.\n\n## Reporting a suspected breach\n\nAny employee, partner, or contractor who suspects that client information has been disclosed without authorization must report the matter to the General Counsel's office within 24 hours of discovery. Reports may be made by phone or in writing. The General Counsel's office logs every report, regardless of severity, and determines within 3 business days whether client notification or regulatory reporting is required. Retaliation against an employee who reports a suspected breach in good faith is strictly prohibited.\n\n## Client communications\n\nAttorneys must confirm a client's preferred and approved communication channel before sending Confidential or Privileged material. Where a client has requested that certain family members, co-parties, or third parties be excluded from communications, that restriction is noted in the matter file and must be honored by every timekeeper on the matter.\n\n## Departing personnel\n\nWhen an attorney or staff member leaves the firm, IT disables system access on the departure date, and the responsible partner for each of that person's active matters confirms in writing that no client files were retained on personal devices or personal cloud storage. Exit confirmations are filed with the Records Department alongside the personnel file.\n\n## Cross-references\n\n- See POL-2230, Document Retention Schedule, for how long confidential client records are kept before destruction.\n- See POL-2250, Remote Work Policy, for device encryption and multi-factor authentication requirements when handling Confidential or Privileged data remotely.\n- See POL-2201, Engagement and Billing Policy, for the conflict-check requirement before an engagement letter is issued.\n\n## Questions\n\nQuestions about this policy, or reports of a suspected confidentiality breach, should go directly to the Office of the General Counsel."
+      },
+      {
+        "chunk_id": "ae2c49bd-a035-441f-b035-1641a616405e",
+        "doc_name": "client-confidentiality-policy.md",
+        "score": 0.03125,
+        "text": "# Client Confidentiality Policy\n\n**Policy number:** POL-2210\n**Applies to:** All personnel, contract staff, and vendors with access to client information\n**Effective date:** March 1, 2022\n**Owner:** Office of the General Counsel\n\n## Purpose\n\nAcme Legal Partners LLP holds client confidences as a foundational professional obligation. This policy sets out how client information is classified, how conflicts of interest are checked before a matter is accepted, how information barriers are established, and how a suspected breach of confidentiality must be reported.\n\n## Data classification\n\nAll client-related information handled by the firm falls into one of four classifications:\n\n- **Public:** information the client has authorized for public release.\n- **Internal:** administrative information not tied to specific client matters, such as firm-wide scheduling.\n- **Confidential:** matter-specific information, including case strategy, financial terms, and correspondence.\n- **Privileged:** information protected by attorney-client privilege or work-product doctrine.\n\nConfidential and Privileged materials may never be transmitted over unencrypted channels and may not be stored on personal devices. Staff handling Privileged materials must use firm-issued, encrypted devices as described in the Remote Work Policy, POL-2250.\n\n## Conflict checks\n\nBefore any new matter is accepted, the responsible partner must submit a conflict check request to the Conflicts Committee. The Conflicts Committee clears or flags the request within 2 business days of submission. No engagement letter under POL-2201 may be issued until the conflict check has cleared. If a conflict is identified but the affected clients consent in writing, the matter may proceed under an information barrier, described below.\n\n## Information barriers\n\nWhen a conflict is waived by informed client consent, the firm establishes an information barrier, sometimes called an ethical wall, around the matter. Attorneys and staff on one side of the wall may not discuss matter details, access shared files, or attend strategy meetings related to the matter on the other side of the wall. The Conflicts Committee documents every information barrier in a written memorandum, circulated to all personnel named in the wall, and reviews each active wall quarterly to confirm it remains necessary.\n\n## Non-disclosure agreements\n\nEvery contract staff member, temporary paralegal, and third-party vendor who will have access to Confidential or Privileged client data must sign a non-disclosure agreement before receiving system access. NDAs are administered by Human Resources and filed with the Records Department. Vendors providing services such as document review,"
+      },
+      {
+        "chunk_id": "1d123357-9247-46ec-8045-b795e776028a",
+        "doc_name": "engagement-and-billing-policy.md",
+        "score": 0.030303030303030304,
+        "text": ", for handling of client financial information contained in billing records.\n- See POL-2260, Expense Reimbursement Policy, for how client-billable expenses are recorded separately from timekeeper time entries.\n\n## Questions\n\nQuestions about this policy should be directed to the Finance Department or the Managing Partner's office. Requests for rate exceptions must be submitted in writing and will be tracked against the client's engagement letter file."
+      },
+      {
+        "chunk_id": "8d92eef6-25ad-4e7b-af09-7e51b1b1001a",
+        "doc_name": "expense-reimbursement.md",
+        "score": 0.02967032967032967,
+        "text": " can route the charge correctly on the client's next invoice.\n\n## Reimbursement processing\n\nOnce an expense report is approved, Finance processes reimbursement within 15 business days. Reimbursements are paid via direct deposit using the same bank account as payroll. Employees can check the status of a submitted expense report at any time through the Finance system.\n\n## Equipment stipend claims\n\nThe $500 annual home office equipment stipend described in POL-2250 is claimed through the standard expense process. Stipend claims should be tagged as \"Home Office Equipment\" and do not require managing partner sign-off regardless of amount, since the $500 annual cap is enforced automatically by the Finance system.\n\n## Non-reimbursable expenses\n\nThe following are never reimbursable under this policy: parking or traffic violations, personal entertainment unrelated to client development, expenses for a spouse or guest without prior Managing Partner approval, and any expense that would violate the Client Confidentiality Policy, POL-2210, such as printing costs at an unsecured third-party print shop for Confidential materials.\n\n## Client-billable expenses\n\nExpenses incurred directly on behalf of a client, such as court filing fees, expert witness costs, or travel required for a specific matter, are recorded separately from personal reimbursable expenses. Client-billable expenses must reference the matter number and are passed through to the client's invoice under the terms of the applicable engagement letter, without markup unless the engagement letter specifies otherwise.\n\n## Cross-references\n\n- See POL-2201, Engagement and Billing Policy, for how client-billable expenses appear on client invoices.\n- See POL-2250, Remote Work Policy, for the home office equipment stipend.\n- See POL-2210, Client Confidentiality Policy, for handling Confidential materials during business travel.\n\n## Questions\n\nQuestions about expense reports, reimbursement status, or the equipment stipend should be directed to the Finance Department."
+      }
+    ],
+    "grades": [
+      {
+        "chunk_id": "05a00d68-ad51-4ea6-91e8-ea36cfd6a0f3",
+        "relevant": true,
+        "reason": "This chunk outlines specific device security requirements including full-disk encryption and multi-factor authentication for devices handling Privileged client information, as well as the compliance check frequency."
+      },
+      {
+        "chunk_id": "6e4e34b1-5539-4797-aae6-2ec47814cf50",
+        "relevant": true,
+        "reason": "This chunk explicitly details security requirements for remote connections, including encryption and authentication, and mentions the quarterly compliance checks by IT Security."
+      },
+      {
+        "chunk_id": "f4fb55cc-6b2f-4be1-9170-8efb91a4d302",
+        "relevant": false,
+        "reason": "This chunk discusses non-disclosure agreements and breach reporting, which are not directly related to device security requirements or compliance checks."
+      },
+      {
+        "chunk_id": "ae2c49bd-a035-441f-b035-1641a616405e",
+        "relevant": false,
+        "reason": "This chunk describes client confidentiality policy and data classification but does not address the specific device security requirements or compliance check frequency."
+      },
+      {
+        "chunk_id": "1d123357-9247-46ec-8045-b795e776028a",
+        "relevant": false,
+        "reason": "This chunk relates to billing and reimbursement processes, which do not pertain to device security requirements or compliance checks for handling Privileged client information."
+      },
+      {
+        "chunk_id": "8d92eef6-25ad-4e7b-af09-7e51b1b1001a",
+        "relevant": false,
+        "reason": "This chunk is focused on reimbursement processing and claims, which are not relevant to the question regarding device security requirements or compliance checks."
+      }
+    ],
+    "rewrite_count": 0,
+    "trace": [
+      {
+        "node": "retrieve",
+        "message": "Retrieved 6 chunk(s) for: 'What device security requirements apply when handling Privileged client information remotely, and how often does IT Security check devices for compliance?'"
+      },
+      {
+        "node": "grade",
+        "message": "Graded 6 chunk(s): 2 relevant"
+      },
+      {
+        "node": "generate",
+        "message": "Generated answer"
+      },
+      {
+        "node": "groundedness_check",
+        "message": "Grounded: Fully supported."
+      }
+    ],
+    "judge_verdict": {
+      "grounded": true,
+      "unsupported_claims": [],
+      "reason": "All claims made in the response can be supported by the sources. The response correctly paraphrases specific device security requirements which align with the Client Confidentiality Policy and accurately represents the quarterly compliance checks performed by IT Security."
+    },
+    "pipeline_internal_groundedness": true,
+    "pipeline_internal_groundedness_failure_reason": null
+  },
+  "correction_off": {
+    "answer": "When handling Privileged client information remotely, the following device security requirements apply: laptops must have full-disk encryption enabled and multi-factor authentication configured on all accounts with access to this information, in accordance with the Client Confidentiality Policy, POL-2210. Additionally, IT Security conducts a quarterly compliance check of remote devices; if any device is found to be out of compliance, it will be remotely locked until the issue is resolved [05a00d68-ad51-4ea6-91e8-ea36cfd6a0f3].",
+    "retrieved_chunks_passed_to_judge": [
+      {
+        "chunk_id": "05a00d68-ad51-4ea6-91e8-ea36cfd6a0f3",
+        "doc_name": "remote-work-policy.md",
+        "score": 0.03252247488101534,
+        "text": " laptops must have full-disk encryption enabled and multi-factor authentication configured on all accounts with access to Confidential or Privileged client information, consistent with the Client Confidentiality Policy, POL-2210. IT Security conducts a quarterly compliance check of remote devices; devices found out of compliance are remotely locked until the issue is resolved.\n\n## Working from outside the country\n\nEmployees who wish to work remotely from outside the country for more than 5 consecutive business days must submit a request to Human Resources at least 10 business days in advance. Requests are reviewed jointly by Human Resources and IT Security to confirm that data residency, export control, and client confidentiality obligations can still be met from the proposed location. Some jurisdictions are excluded from approval due to legal or security constraints; the current exclusion list is maintained by IT Security and available on request.\n\n## Shared and public workspaces\n\nEmployees working from a shared or public workspace, such as a co-working space or coffee shop, must use a privacy screen when viewing Confidential or Privileged material and must not conduct client calls where the conversation could reasonably be overheard. Printing client documents in a shared workspace is prohibited.\n\n## Office access for remote employees\n\nRemote employees retain full badge access to both firm offices and are encouraged to reserve a desk in advance through the firm's scheduling system when planning an in-office day, particularly during weeks with high office occupancy.\n\n## Non-compliance\n\nRepeated failure to meet the 3-day in-office minimum without supervising partner approval, or a security compliance failure identified during a quarterly device check, may result in suspension of remote work privileges, reviewed by Human Resources on a case-by-case basis.\n\n## Cross-references\n\n- See POL-2210, Client Confidentiality Policy, for encryption and access control requirements.\n- See POL-2260, Expense Reimbursement Policy, for how the equipment stipend is claimed.\n- See POL-2201, Engagement and Billing Policy, for recording time worked outside core hours.\n\n## Questions\n\nQuestions about hybrid scheduling should go to your supervising partner. Questions about VPN, encryption, or device compliance should go to IT Security."
+      },
+      {
+        "chunk_id": "6e4e34b1-5539-4797-aae6-2ec47814cf50",
+        "doc_name": "remote-work-policy.md",
+        "score": 0.032266458495966696,
+        "text": "# Remote Work Policy\n\n**Policy number:** POL-2250\n**Applies to:** All non-partner employees of Acme Legal Partners LLP\n**Effective date:** March 1, 2022\n**Owner:** Human Resources, in coordination with IT Security\n\n## Purpose\n\nThis policy sets the standard hybrid work arrangement for Acme Legal Partners LLP, the security requirements for working outside a firm office, and the equipment support available to remote employees. Partners are not subject to the in-office day requirement but must still comply with the security requirements below whenever accessing firm systems remotely.\n\n## Hybrid work requirement\n\nNon-partner employees are required to work a minimum of 3 days per week from a firm office, either Meridian City or Port Callahan. The remaining days may be worked remotely, subject to supervising partner approval and client coverage needs. Supervising partners set specific in-office days for their teams to support collaboration on active matters; employees should confirm their team's schedule with their supervising partner.\n\n## Core collaboration hours\n\nRegardless of remote or in-office status, all employees are expected to be available during core collaboration hours of 10:00 a.m. to 4:00 p.m. local time, Monday through Friday. Meetings involving multiple timekeepers should be scheduled within core hours whenever possible. Employees working outside standard business hours to meet a client deadline should record that time consistent with the Engagement and Billing Policy, POL-2201.\n\n## Equipment and stipend\n\nThe firm provides a home office equipment stipend of $500 per year to employees who regularly work remotely. The stipend may be used for items such as a monitor, chair, or docking station and is reimbursed through the standard expense process described in the Expense Reimbursement Policy, POL-2260. All primary work must be performed on a firm-issued laptop; personal computers may not be used to access firm systems or client data.\n\n## Security requirements\n\nEvery remote connection to firm systems must go through the firm-managed VPN. Split-tunneling or other configurations that route firm traffic outside the VPN are prohibited. Firm-issued laptops must have full-disk encryption enabled and multi-factor authentication configured on all accounts with access to Confidential or Privileged client information, consistent with the Client Confidentiality Policy, POL-2210. IT Security conducts a quarterly compliance check of remote devices; devices found out of compliance are remotely locked until the issue is resolved.\n\n## Working from outside the country\n\nEmployees who wish to"
+      },
+      {
+        "chunk_id": "f4fb55cc-6b2f-4be1-9170-8efb91a4d302",
+        "doc_name": "client-confidentiality-policy.md",
+        "score": 0.03200204813108039,
+        "text": " active wall quarterly to confirm it remains necessary.\n\n## Non-disclosure agreements\n\nEvery contract staff member, temporary paralegal, and third-party vendor who will have access to Confidential or Privileged client data must sign a non-disclosure agreement before receiving system access. NDAs are administered by Human Resources and filed with the Records Department. Vendors providing services such as document review, e-discovery, or court reporting are contractually bound to the same confidentiality standards as firm employees.\n\n## Reporting a suspected breach\n\nAny employee, partner, or contractor who suspects that client information has been disclosed without authorization must report the matter to the General Counsel's office within 24 hours of discovery. Reports may be made by phone or in writing. The General Counsel's office logs every report, regardless of severity, and determines within 3 business days whether client notification or regulatory reporting is required. Retaliation against an employee who reports a suspected breach in good faith is strictly prohibited.\n\n## Client communications\n\nAttorneys must confirm a client's preferred and approved communication channel before sending Confidential or Privileged material. Where a client has requested that certain family members, co-parties, or third parties be excluded from communications, that restriction is noted in the matter file and must be honored by every timekeeper on the matter.\n\n## Departing personnel\n\nWhen an attorney or staff member leaves the firm, IT disables system access on the departure date, and the responsible partner for each of that person's active matters confirms in writing that no client files were retained on personal devices or personal cloud storage. Exit confirmations are filed with the Records Department alongside the personnel file.\n\n## Cross-references\n\n- See POL-2230, Document Retention Schedule, for how long confidential client records are kept before destruction.\n- See POL-2250, Remote Work Policy, for device encryption and multi-factor authentication requirements when handling Confidential or Privileged data remotely.\n- See POL-2201, Engagement and Billing Policy, for the conflict-check requirement before an engagement letter is issued.\n\n## Questions\n\nQuestions about this policy, or reports of a suspected confidentiality breach, should go directly to the Office of the General Counsel."
+      },
+      {
+        "chunk_id": "ae2c49bd-a035-441f-b035-1641a616405e",
+        "doc_name": "client-confidentiality-policy.md",
+        "score": 0.03125,
+        "text": "# Client Confidentiality Policy\n\n**Policy number:** POL-2210\n**Applies to:** All personnel, contract staff, and vendors with access to client information\n**Effective date:** March 1, 2022\n**Owner:** Office of the General Counsel\n\n## Purpose\n\nAcme Legal Partners LLP holds client confidences as a foundational professional obligation. This policy sets out how client information is classified, how conflicts of interest are checked before a matter is accepted, how information barriers are established, and how a suspected breach of confidentiality must be reported.\n\n## Data classification\n\nAll client-related information handled by the firm falls into one of four classifications:\n\n- **Public:** information the client has authorized for public release.\n- **Internal:** administrative information not tied to specific client matters, such as firm-wide scheduling.\n- **Confidential:** matter-specific information, including case strategy, financial terms, and correspondence.\n- **Privileged:** information protected by attorney-client privilege or work-product doctrine.\n\nConfidential and Privileged materials may never be transmitted over unencrypted channels and may not be stored on personal devices. Staff handling Privileged materials must use firm-issued, encrypted devices as described in the Remote Work Policy, POL-2250.\n\n## Conflict checks\n\nBefore any new matter is accepted, the responsible partner must submit a conflict check request to the Conflicts Committee. The Conflicts Committee clears or flags the request within 2 business days of submission. No engagement letter under POL-2201 may be issued until the conflict check has cleared. If a conflict is identified but the affected clients consent in writing, the matter may proceed under an information barrier, described below.\n\n## Information barriers\n\nWhen a conflict is waived by informed client consent, the firm establishes an information barrier, sometimes called an ethical wall, around the matter. Attorneys and staff on one side of the wall may not discuss matter details, access shared files, or attend strategy meetings related to the matter on the other side of the wall. The Conflicts Committee documents every information barrier in a written memorandum, circulated to all personnel named in the wall, and reviews each active wall quarterly to confirm it remains necessary.\n\n## Non-disclosure agreements\n\nEvery contract staff member, temporary paralegal, and third-party vendor who will have access to Confidential or Privileged client data must sign a non-disclosure agreement before receiving system access. NDAs are administered by Human Resources and filed with the Records Department. Vendors providing services such as document review,"
+      },
+      {
+        "chunk_id": "1d123357-9247-46ec-8045-b795e776028a",
+        "doc_name": "engagement-and-billing-policy.md",
+        "score": 0.030303030303030304,
+        "text": ", for handling of client financial information contained in billing records.\n- See POL-2260, Expense Reimbursement Policy, for how client-billable expenses are recorded separately from timekeeper time entries.\n\n## Questions\n\nQuestions about this policy should be directed to the Finance Department or the Managing Partner's office. Requests for rate exceptions must be submitted in writing and will be tracked against the client's engagement letter file."
+      },
+      {
+        "chunk_id": "8d92eef6-25ad-4e7b-af09-7e51b1b1001a",
+        "doc_name": "expense-reimbursement.md",
+        "score": 0.02967032967032967,
+        "text": " can route the charge correctly on the client's next invoice.\n\n## Reimbursement processing\n\nOnce an expense report is approved, Finance processes reimbursement within 15 business days. Reimbursements are paid via direct deposit using the same bank account as payroll. Employees can check the status of a submitted expense report at any time through the Finance system.\n\n## Equipment stipend claims\n\nThe $500 annual home office equipment stipend described in POL-2250 is claimed through the standard expense process. Stipend claims should be tagged as \"Home Office Equipment\" and do not require managing partner sign-off regardless of amount, since the $500 annual cap is enforced automatically by the Finance system.\n\n## Non-reimbursable expenses\n\nThe following are never reimbursable under this policy: parking or traffic violations, personal entertainment unrelated to client development, expenses for a spouse or guest without prior Managing Partner approval, and any expense that would violate the Client Confidentiality Policy, POL-2210, such as printing costs at an unsecured third-party print shop for Confidential materials.\n\n## Client-billable expenses\n\nExpenses incurred directly on behalf of a client, such as court filing fees, expert witness costs, or travel required for a specific matter, are recorded separately from personal reimbursable expenses. Client-billable expenses must reference the matter number and are passed through to the client's invoice under the terms of the applicable engagement letter, without markup unless the engagement letter specifies otherwise.\n\n## Cross-references\n\n- See POL-2201, Engagement and Billing Policy, for how client-billable expenses appear on client invoices.\n- See POL-2250, Remote Work Policy, for the home office equipment stipend.\n- See POL-2210, Client Confidentiality Policy, for handling Confidential materials during business travel.\n\n## Questions\n\nQuestions about expense reports, reimbursement status, or the equipment stipend should be directed to the Finance Department."
+      }
+    ],
+    "grades": [],
+    "rewrite_count": 0,
+    "trace": [
+      {
+        "node": "retrieve",
+        "message": "Retrieved 6 chunk(s) for: 'What device security requirements apply when handling Privileged client information remotely, and how often does IT Security check devices for compliance?'"
+      },
+      {
+        "node": "generate",
+        "message": "Generated answer"
+      }
+    ],
+    "judge_verdict": {
+      "grounded": true,
+      "unsupported_claims": [],
+      "reason": "All claims made in the answer are supported by the sources. The requirements for handling Privileged client information remotely, including full-disk encryption and multi-factor authentication, are explicitly stated in the source. Furthermore, the quarterly compliance checks by IT Security and the procedure for devices found out of compliance are also supported by the source."
+    },
+    "pipeline_internal_groundedness": null,
+    "pipeline_internal_groundedness_failure_reason": null
+  }
+}

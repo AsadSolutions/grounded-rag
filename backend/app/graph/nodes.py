@@ -85,12 +85,22 @@ def generate_answer_llm(question: str, chunks: list[ScoredChunk], failure_reason
     return response.choices[0].message.content.strip()
 
 
-class _GroundednessVerdict(BaseModel):
-    grounded: bool
-    reason: str
+class _GroundednessExtraction(BaseModel):
+    unsupported_claims: list[str]
 
 
 def check_groundedness_llm(answer: str, chunks: list[ScoredChunk]) -> tuple[bool, str]:
+    """Returns (grounded, reason). `grounded` is derived in code from whether the model's
+    unsupported_claims list is empty, rather than asked of the model directly — an earlier
+    version had the model produce grounded as its own field and it periodically contradicted
+    its own claims list (grounded=false with an empty list, or vice versa) because structured
+    output decodes JSON fields in schema order, forcing a verdict before the claim-by-claim
+    extraction that was supposed to justify it. See app/eval/judge.py for the same fix.
+
+    `reason` lists the unsupported claims verbatim when not grounded, so the regeneration
+    prompt in generate_answer_llm's failure_reason sees exactly what failed, not a vague
+    restatement.
+    """
     settings = get_settings()
     sources = "\n\n".join(f"[{c.chunk_id}] {c.text}" for c in chunks)
     response = _openai_client().chat.completions.parse(
@@ -99,16 +109,29 @@ def check_groundedness_llm(answer: str, chunks: list[ScoredChunk]) -> tuple[bool
             {
                 "role": "system",
                 "content": (
-                    "Verify every claim in the answer is supported by the sources. "
-                    "grounded=true only if fully supported."
+                    "Extract every discrete factual claim the answer makes, then check each "
+                    "claim against the sources one at a time, judging the meaning of the claim "
+                    "against the meaning of the sources, not the exact wording. A claim is "
+                    "SUPPORTED if it is a faithful paraphrase, rewording, summary, or unit "
+                    "conversion of something the sources state, or if it resolves a pronoun or "
+                    "reference to an entity the sources name in the same context — combining "
+                    "several sentences from the sources into one is not a fabrication. A claim "
+                    "is UNSUPPORTED only if it introduces a specific fact, number, entity, "
+                    "exception, or condition that the sources do not state and cannot be "
+                    "reasonably derived from what they do state. List every unsupported claim "
+                    "verbatim in unsupported_claims; leave it empty if every claim is supported. "
+                    'An answer that says the information was "not found in the documents", and '
+                    "makes no other factual claims, has no unsupported claims."
                 ),
             },
             {"role": "user", "content": f"Answer: {answer}\n\nSources:\n{sources}"},
         ],
-        response_format=_GroundednessVerdict,
+        response_format=_GroundednessExtraction,
     )
-    verdict = response.choices[0].message.parsed
-    return verdict.grounded, verdict.reason
+    extraction = response.choices[0].message.parsed
+    grounded = len(extraction.unsupported_claims) == 0
+    reason = "Fully supported." if grounded else "Unsupported claims: " + "; ".join(extraction.unsupported_claims)
+    return grounded, reason
 
 
 def retrieve(state: GraphState, *, search_fn=hybrid_search) -> GraphState:

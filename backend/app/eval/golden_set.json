@@ -1,0 +1,484 @@
+[
+  {
+    "id": "acme-01",
+    "tenant_id": "demo-acme-legal",
+    "category": "baseline",
+    "question": "What are the four classifications of client-related information at Acme Legal Partners?",
+    "expected_answer_facts": ["Public", "Internal", "Confidential", "Privileged"],
+    "expected_chunks": [
+      {"doc_name": "client-confidentiality-policy.md", "contains": "Confidential and Privileged materials may never be transmitted over unencrypted channels"}
+    ],
+    "unanswerable": false
+  },
+  {
+    "id": "acme-02",
+    "tenant_id": "demo-acme-legal",
+    "category": "baseline",
+    "question": "How many business days does the Conflicts Committee have to clear or flag a conflict check request?",
+    "expected_answer_facts": ["2 business days"],
+    "expected_chunks": [
+      {"doc_name": "client-confidentiality-policy.md", "contains": "clears or flags the request within 2 business days of submission"}
+    ],
+    "unanswerable": false
+  },
+  {
+    "id": "acme-03",
+    "tenant_id": "demo-acme-legal",
+    "category": "baseline",
+    "question": "How long are client matter files retained after a matter is formally closed?",
+    "expected_answer_facts": ["7 years"],
+    "expected_chunks": [
+      {"doc_name": "document-retention-schedule.md", "contains": "retained 7 years after the matter is formally closed in the timekeeping system"}
+    ],
+    "unanswerable": false
+  },
+  {
+    "id": "acme-04",
+    "tenant_id": "demo-acme-legal",
+    "category": "baseline",
+    "question": "What happens to records once a litigation hold is issued?",
+    "expected_answer_facts": ["suspends the standard retention schedule", "records may not be destroyed, altered, or transferred"],
+    "expected_chunks": [
+      {"doc_name": "document-retention-schedule.md", "contains": "A litigation hold immediately suspends the standard retention schedule for every record"}
+    ],
+    "unanswerable": false
+  },
+  {
+    "id": "acme-05",
+    "tenant_id": "demo-acme-legal",
+    "category": "baseline",
+    "question": "What is Acme Legal's standard hourly rate for a Senior Associate?",
+    "expected_answer_facts": ["$475 per hour"],
+    "expected_chunks": [
+      {"doc_name": "engagement-and-billing-policy.md", "contains": "Senior Associate: $475 per hour"}
+    ],
+    "unanswerable": false
+  },
+  {
+    "id": "acme-06",
+    "tenant_id": "demo-acme-legal",
+    "category": "baseline",
+    "question": "How much is the initial retainer required for new matters without an established payment history?",
+    "expected_answer_facts": ["$5,000"],
+    "expected_chunks": [
+      {"doc_name": "engagement-and-billing-policy.md", "contains": "require an initial retainer of $5,000, collected before work begins"}
+    ],
+    "unanswerable": false
+  },
+  {
+    "id": "acme-07",
+    "tenant_id": "demo-acme-legal",
+    "category": "baseline",
+    "question": "What is the mileage reimbursement rate for employees using a personal vehicle for business travel?",
+    "expected_answer_facts": ["$0.62 per mile"],
+    "expected_chunks": [
+      {"doc_name": "expense-reimbursement.md", "contains": "reimbursed at a rate of $0.62 per mile"}
+    ],
+    "unanswerable": false
+  },
+  {
+    "id": "acme-08",
+    "tenant_id": "demo-acme-legal",
+    "category": "baseline",
+    "question": "How many days of PTO per year do employees with 3 or more years of tenure accrue?",
+    "expected_answer_facts": ["20 days"],
+    "expected_chunks": [
+      {"doc_name": "leave-and-benefits.md", "contains": "3 or more years of tenure accrue 20 days of PTO per year"}
+    ],
+    "unanswerable": false
+  },
+  {
+    "id": "acme-09",
+    "tenant_id": "demo-acme-legal",
+    "category": "baseline",
+    "question": "How many weeks of paid parental leave are eligible employees entitled to?",
+    "expected_answer_facts": ["12 weeks"],
+    "expected_chunks": [
+      {"doc_name": "leave-and-benefits.md", "contains": "eligible for 12 weeks of paid parental leave following the birth"}
+    ],
+    "unanswerable": false
+  },
+  {
+    "id": "acme-10",
+    "tenant_id": "demo-acme-legal",
+    "category": "baseline",
+    "question": "What is the minimum number of days per week that non-partner employees must work from a firm office?",
+    "expected_answer_facts": ["3 days per week"],
+    "expected_chunks": [
+      {"doc_name": "remote-work-policy.md", "contains": "required to work a minimum of 3 days per week from a firm office"}
+    ],
+    "unanswerable": false
+  },
+  {
+    "id": "techcorp-01",
+    "tenant_id": "demo-techcorp",
+    "category": "baseline",
+    "question": "What is the Atlas API's rate limit?",
+    "expected_answer_facts": ["600 requests per minute per API key"],
+    "expected_chunks": [
+      {"doc_name": "api-basics.md", "contains": "enforces a rate limit of 600 requests per minute per API key"}
+    ],
+    "unanswerable": false
+  },
+  {
+    "id": "techcorp-02",
+    "tenant_id": "demo-techcorp",
+    "category": "baseline",
+    "question": "What is the maximum file attachment size for a task in Atlas?",
+    "expected_answer_facts": ["25MB"],
+    "expected_chunks": [
+      {"doc_name": "api-basics.md", "contains": "maximum attachment size is 25MB per file"}
+    ],
+    "unanswerable": false
+  },
+  {
+    "id": "techcorp-03",
+    "tenant_id": "demo-techcorp",
+    "category": "baseline",
+    "question": "What are the password requirements for an Atlas account?",
+    "expected_answer_facts": ["at least 12 characters", "at least 1 number", "at least 1 symbol"],
+    "expected_chunks": [
+      {"doc_name": "getting-started-guide.md", "contains": "must be at least 12 characters long and include at least 1 number and 1 symbol"}
+    ],
+    "unanswerable": false
+  },
+  {
+    "id": "techcorp-04",
+    "tenant_id": "demo-techcorp",
+    "category": "baseline",
+    "question": "How long is the free trial for new Atlas workspaces, and what plan does it grant access to?",
+    "expected_answer_facts": ["14-day free trial", "Team plan"],
+    "expected_chunks": [
+      {"doc_name": "getting-started-guide.md", "contains": "begin on a 14-day free trial of the Team plan"}
+    ],
+    "unanswerable": false
+  },
+  {
+    "id": "techcorp-05",
+    "tenant_id": "demo-techcorp",
+    "category": "baseline",
+    "question": "How many seats does the Team plan include and what is its price per seat?",
+    "expected_answer_facts": ["25 seats", "$24 per seat per month"],
+    "expected_chunks": [
+      {"doc_name": "product-overview.md", "contains": "up to 25 seats, priced at $24 per seat per month"}
+    ],
+    "unanswerable": false
+  },
+  {
+    "id": "techcorp-06",
+    "tenant_id": "demo-techcorp",
+    "category": "baseline",
+    "question": "What encryption standard does Atlas use for data at rest?",
+    "expected_answer_facts": ["AES-256"],
+    "expected_chunks": [
+      {"doc_name": "security-faq.md", "contains": "Data at rest in Atlas is encrypted using AES-256"}
+    ],
+    "unanswerable": false
+  },
+  {
+    "id": "techcorp-07",
+    "tenant_id": "demo-techcorp",
+    "category": "baseline",
+    "question": "Within how many hours after confirming a security incident does TechCorp notify affected customers?",
+    "expected_answer_facts": ["72 hours"],
+    "expected_chunks": [
+      {"doc_name": "security-faq.md", "contains": "notifies affected customers within 72 hours of confirming the incident"}
+    ],
+    "unanswerable": false
+  },
+  {
+    "id": "techcorp-08",
+    "tenant_id": "demo-techcorp",
+    "category": "baseline",
+    "question": "What does Atlas error code E-1077 mean?",
+    "expected_answer_facts": ["rate limit exceeded", "HTTP 429"],
+    "expected_chunks": [
+      {"doc_name": "troubleshooting-guide.md", "contains": "E-1077 corresponds to an HTTP 429 response and indicates that an API key has exceeded"}
+    ],
+    "unanswerable": false
+  },
+  {
+    "id": "techcorp-09",
+    "tenant_id": "demo-techcorp",
+    "category": "baseline",
+    "question": "How many days does a customer on a monthly billing cycle have to request a full refund?",
+    "expected_answer_facts": ["14 days"],
+    "expected_chunks": [
+      {"doc_name": "warranty-and-refund-policy.md", "contains": "may request a full refund within 14 days of their most recent charge"}
+    ],
+    "unanswerable": false
+  },
+  {
+    "id": "techcorp-10",
+    "tenant_id": "demo-techcorp",
+    "category": "baseline",
+    "question": "What service credit applies if Atlas's monthly uptime falls below 99.0%?",
+    "expected_answer_facts": ["25% service credit"],
+    "expected_chunks": [
+      {"doc_name": "warranty-and-refund-policy.md", "contains": "Uptime below 99.0%: a 25% service credit applied to the following month's invoice"}
+    ],
+    "unanswerable": false
+  },
+  {
+    "id": "acme-unanswerable-01",
+    "tenant_id": "demo-acme-legal",
+    "category": "baseline",
+    "question": "What is Acme Legal Partners' malpractice insurance carrier and coverage limit?",
+    "expected_answer_facts": [],
+    "expected_chunks": [],
+    "unanswerable": true
+  },
+  {
+    "id": "acme-unanswerable-02",
+    "tenant_id": "demo-acme-legal",
+    "category": "baseline",
+    "question": "Does Acme Legal Partners offer a signing bonus for laterally hired partners?",
+    "expected_answer_facts": [],
+    "expected_chunks": [],
+    "unanswerable": true
+  },
+  {
+    "id": "techcorp-unanswerable-01",
+    "tenant_id": "demo-techcorp",
+    "category": "baseline",
+    "question": "Does Atlas offer a native mobile app for iOS or Android?",
+    "expected_answer_facts": [],
+    "expected_chunks": [],
+    "unanswerable": true
+  },
+  {
+    "id": "techcorp-unanswerable-02",
+    "tenant_id": "demo-techcorp",
+    "category": "baseline",
+    "question": "What is the maximum number of workspaces a single Enterprise customer can create under one billing account?",
+    "expected_answer_facts": [],
+    "expected_chunks": [],
+    "unanswerable": true
+  },
+  {
+    "id": "techcorp-unanswerable-03",
+    "tenant_id": "demo-techcorp",
+    "category": "baseline",
+    "question": "Who is Atlas's Chief Executive Officer?",
+    "expected_answer_facts": [],
+    "expected_chunks": [],
+    "unanswerable": true
+  },
+  {
+    "id": "rewrite-01",
+    "tenant_id": "demo-acme-legal",
+    "category": "rewrite_bait",
+    "question": "how long till they nuke old client files",
+    "expected_answer_facts": ["7 years"],
+    "expected_chunks": [
+      {"doc_name": "document-retention-schedule.md", "contains": "retained 7 years after the matter is formally closed"}
+    ],
+    "unanswerable": false
+  },
+  {
+    "id": "rewrite-02",
+    "tenant_id": "demo-techcorp",
+    "category": "rewrite_bait",
+    "question": "whats the E42 error mean",
+    "expected_answer_facts": ["sync conflict"],
+    "expected_chunks": [
+      {"doc_name": "troubleshooting-guide.md", "contains": "E-1042 occurs when two people edit the same task or Board field"}
+    ],
+    "unanswerable": false
+  },
+  {
+    "id": "rewrite-03",
+    "tenant_id": "demo-acme-legal",
+    "category": "rewrite_bait",
+    "question": "whats the deal with the ethics wall thing",
+    "expected_answer_facts": ["information barrier", "ethical wall"],
+    "expected_chunks": [
+      {"doc_name": "client-confidentiality-policy.md", "contains": "establishes an information barrier, sometimes called an ethical wall"}
+    ],
+    "unanswerable": false
+  },
+  {
+    "id": "rewrite-04",
+    "tenant_id": "demo-techcorp",
+    "category": "rewrite_bait",
+    "question": "how many people can be on the cheapo plan",
+    "expected_answer_facts": ["5 seats"],
+    "expected_chunks": [
+      {"doc_name": "product-overview.md", "contains": "up to 5 seats, priced at $12 per seat per month"}
+    ],
+    "unanswerable": false
+  },
+  {
+    "id": "rewrite-05",
+    "tenant_id": "demo-acme-legal",
+    "category": "rewrite_bait",
+    "question": "psto cash out limit",
+    "expected_answer_facts": ["5 days"],
+    "expected_chunks": [
+      {"doc_name": "leave-and-benefits.md", "contains": "cash out up to 5 days of unused PTO per year"}
+    ],
+    "unanswerable": false
+  },
+  {
+    "id": "rewrite-06",
+    "tenant_id": "demo-techcorp",
+    "category": "rewrite_bait",
+    "question": "acct lockout after how long idle",
+    "expected_answer_facts": ["30 minutes"],
+    "expected_chunks": [
+      {"doc_name": "security-faq.md", "contains": "Web app sessions time out after 30 minutes of inactivity by default"}
+    ],
+    "unanswerable": false
+  },
+  {
+    "id": "multi-01",
+    "tenant_id": "demo-acme-legal",
+    "category": "multi_chunk",
+    "question": "What device security requirements apply when handling Privileged client information remotely, and how often does IT Security check devices for compliance?",
+    "expected_answer_facts": ["firm-issued, encrypted devices", "full-disk encryption", "multi-factor authentication", "quarterly compliance check"],
+    "expected_chunks": [
+      {"doc_name": "client-confidentiality-policy.md", "contains": "Staff handling Privileged materials must use firm-issued, encrypted devices as described in the Remote Work Policy"},
+      {"doc_name": "remote-work-policy.md", "contains": "IT Security conducts a quarterly compliance check of remote devices"}
+    ],
+    "unanswerable": false
+  },
+  {
+    "id": "multi-02",
+    "tenant_id": "demo-acme-legal",
+    "category": "multi_chunk",
+    "question": "If an employee wants to take 5 consecutive days of PTO, how far in advance must they submit the request, and how many days per week are non-partner employees otherwise required to work from a firm office?",
+    "expected_answer_facts": ["15 business days", "3 days per week"],
+    "expected_chunks": [
+      {"doc_name": "leave-and-benefits.md", "contains": "Requests for PTO of 5 or more consecutive days should be submitted at least 15 business days in advance"},
+      {"doc_name": "remote-work-policy.md", "contains": "required to work a minimum of 3 days per week from a firm office"}
+    ],
+    "unanswerable": false
+  },
+  {
+    "id": "multi-03",
+    "tenant_id": "demo-acme-legal",
+    "category": "multi_chunk",
+    "question": "If an employee suspects a confidentiality breach, how quickly must they report it, and who has sole authority to lift a litigation hold once one is issued?",
+    "expected_answer_facts": ["24 hours", "only the General Counsel's office"],
+    "expected_chunks": [
+      {"doc_name": "client-confidentiality-policy.md", "contains": "must report the matter to the General Counsel's office within 24 hours of discovery"},
+      {"doc_name": "document-retention-schedule.md", "contains": "only the General Counsel's office has authority to lift a hold"}
+    ],
+    "unanswerable": false
+  },
+  {
+    "id": "multi-04",
+    "tenant_id": "demo-techcorp",
+    "category": "multi_chunk",
+    "question": "What is the Atlas API rate limit, and what error code is returned if an integration exceeds it?",
+    "expected_answer_facts": ["600 requests per minute", "E-1077", "HTTP 429"],
+    "expected_chunks": [
+      {"doc_name": "api-basics.md", "contains": "enforces a rate limit of 600 requests per minute per API key"},
+      {"doc_name": "troubleshooting-guide.md", "contains": "E-1077 corresponds to an HTTP 429 response and indicates that an API key has exceeded"}
+    ],
+    "unanswerable": false
+  },
+  {
+    "id": "multi-05",
+    "tenant_id": "demo-techcorp",
+    "category": "multi_chunk",
+    "question": "What are Atlas's password requirements, and what multi-factor authentication methods does it support?",
+    "expected_answer_facts": ["at least 12 characters, 1 number, 1 symbol", "TOTP authenticator apps", "SMS-based codes"],
+    "expected_chunks": [
+      {"doc_name": "getting-started-guide.md", "contains": "must be at least 12 characters long and include at least 1 number and 1 symbol"},
+      {"doc_name": "security-faq.md", "contains": "multi-factor authentication using both TOTP authenticator apps and SMS-based codes"}
+    ],
+    "unanswerable": false
+  },
+  {
+    "id": "distractor-01",
+    "tenant_id": "demo-acme-legal",
+    "category": "distractor_trap",
+    "question": "What is the policy number for the Remote Work Policy?",
+    "expected_answer_facts": ["POL-2250"],
+    "expected_chunks": [
+      {"doc_name": "remote-work-policy.md", "contains": "Policy number:** POL-2250"}
+    ],
+    "unanswerable": false
+  },
+  {
+    "id": "distractor-02",
+    "tenant_id": "demo-acme-legal",
+    "category": "distractor_trap",
+    "question": "What is Acme Legal's standard hourly rate for an Associate (not a Senior Associate)?",
+    "expected_answer_facts": ["$410 per hour"],
+    "expected_chunks": [
+      {"doc_name": "engagement-and-billing-policy.md", "contains": "Associate: $410 per hour"}
+    ],
+    "unanswerable": false
+  },
+  {
+    "id": "distractor-03",
+    "tenant_id": "demo-acme-legal",
+    "category": "distractor_trap",
+    "question": "What retainer balance triggers an automatic replenishment request, and how much is the replenishment request for?",
+    "expected_answer_facts": ["below $1,000 triggers it", "replenishment request is for $5,000"],
+    "expected_chunks": [
+      {"doc_name": "engagement-and-billing-policy.md", "contains": "the retainer balance falls below $1,000, Finance automatically issues a replenishment request"}
+    ],
+    "unanswerable": false
+  },
+  {
+    "id": "distractor-04",
+    "tenant_id": "demo-techcorp",
+    "category": "distractor_trap",
+    "question": "How many seats does the Business plan include?",
+    "expected_answer_facts": ["100 seats"],
+    "expected_chunks": [
+      {"doc_name": "product-overview.md", "contains": "up to 100 seats, priced at $39 per seat per month"}
+    ],
+    "unanswerable": false
+  },
+  {
+    "id": "distractor-05",
+    "tenant_id": "demo-techcorp",
+    "category": "distractor_trap",
+    "question": "What does Atlas error code E-2050 mean, and how many total delivery attempts does Atlas make before marking it permanently failed?",
+    "expected_answer_facts": ["webhook timeout", "3 attempts total"],
+    "expected_chunks": [
+      {"doc_name": "troubleshooting-guide.md", "contains": "retries according to the standard webhook retry policy: 3 attempts total, with exponential backoff starting at 5 seconds"}
+    ],
+    "unanswerable": false
+  },
+  {
+    "id": "nearmiss-01",
+    "tenant_id": "demo-acme-legal",
+    "category": "near_miss_unanswerable",
+    "question": "How long does Acme Legal retain internal firm memos that are not tied to any client matter?",
+    "expected_answer_facts": [],
+    "expected_chunks": [],
+    "unanswerable": true
+  },
+  {
+    "id": "nearmiss-02",
+    "tenant_id": "demo-acme-legal",
+    "category": "near_miss_unanswerable",
+    "question": "Does Acme Legal Partners reimburse employees for co-working space membership fees when working remotely?",
+    "expected_answer_facts": [],
+    "expected_chunks": [],
+    "unanswerable": true
+  },
+  {
+    "id": "nearmiss-03",
+    "tenant_id": "demo-techcorp",
+    "category": "near_miss_unanswerable",
+    "question": "Does Atlas offer a discounted rate for students or nonprofit organizations?",
+    "expected_answer_facts": [],
+    "expected_chunks": [],
+    "unanswerable": true
+  },
+  {
+    "id": "nearmiss-04",
+    "tenant_id": "demo-techcorp",
+    "category": "near_miss_unanswerable",
+    "question": "Is Atlas ISO 27001 certified?",
+    "expected_answer_facts": [],
+    "expected_chunks": [],
+    "unanswerable": true
+  }
+]

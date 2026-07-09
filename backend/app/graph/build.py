@@ -19,6 +19,7 @@ from app.retrieval.hybrid import hybrid_search
 
 def build_graph(
     *,
+    correction_enabled: bool = True,
     search_fn=hybrid_search,
     grade_fn=grade_chunks_llm,
     rewrite_fn=rewrite_query_llm,
@@ -27,12 +28,18 @@ def build_graph(
 ):
     graph = StateGraph(GraphState)
     graph.add_node("retrieve", lambda state: retrieve(state, search_fn=search_fn))
+    graph.add_node("generate", lambda state: generate(state, generate_fn=generate_fn))
+    graph.set_entry_point("retrieve")
+
+    if not correction_enabled:
+        graph.add_edge("retrieve", "generate")
+        graph.add_edge("generate", END)
+        return graph.compile()
+
     graph.add_node("grade", lambda state: grade(state, grade_fn=grade_fn))
     graph.add_node("rewrite", lambda state: rewrite(state, rewrite_fn=rewrite_fn))
-    graph.add_node("generate", lambda state: generate(state, generate_fn=generate_fn))
     graph.add_node("groundedness_check", lambda state: groundedness_check(state, check_fn=check_fn))
 
-    graph.set_entry_point("retrieve")
     graph.add_edge("retrieve", "grade")
     graph.add_conditional_edges("grade", route_after_grade, {"rewrite": "rewrite", "generate": "generate"})
     graph.add_edge("rewrite", "retrieve")
