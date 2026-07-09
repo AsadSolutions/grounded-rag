@@ -138,6 +138,38 @@ def test_graph_never_regenerates_twice_and_finishes_low_confidence():
     assert check_count_in_trace == 2
 
 
+def test_build_graph_with_correction_disabled_skips_grade_rewrite_and_groundedness():
+    state = GraphState(question="what is the travel policy", tenant_id="t1")
+
+    result = _run(
+        state,
+        correction_enabled=False,
+        search_fn=lambda tenant_id, query, k=6: [_chunk("c1"), _chunk("c2")],
+        generate_fn=lambda question, chunks, failure_reason=None: "the answer",
+    )
+
+    assert result.answer == "the answer"
+    assert [t.node for t in result.trace] == ["retrieve", "generate"]
+    assert result.grades == []
+    assert result.groundedness is None
+    assert result.rewrite_count == 0
+    assert result.regenerated is False
+
+
+def test_build_graph_correction_enabled_defaults_to_true_and_is_unchanged():
+    state = GraphState(question="what is the travel policy", tenant_id="t1")
+
+    result = _run(
+        state,
+        search_fn=lambda tenant_id, query, k=6: [_chunk("c1"), _chunk("c2")],
+        grade_fn=lambda question, chunks: [ChunkGrade(chunk_id=c.chunk_id, relevant=True, reason="") for c in chunks],
+        generate_fn=lambda question, chunks, failure_reason=None: "the answer",
+        check_fn=lambda answer, chunks: (True, "fully supported"),
+    )
+
+    assert [t.node for t in result.trace] == ["retrieve", "grade", "generate", "groundedness_check"]
+
+
 def test_graph_terminates_in_worst_case_of_both_hard_limits():
     state = GraphState(question="vague", tenant_id="t1")
 
