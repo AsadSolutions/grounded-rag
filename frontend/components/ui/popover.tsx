@@ -14,9 +14,17 @@ type PopoverProps = {
   trigger: ReactElement<{ onClick?: () => void }>;
   children: ReactNode;
   align?: "start" | "end";
+  placement?: "top" | "bottom";
+  width?: number;
 };
 
-export function Popover({ trigger, children, align = "start" }: PopoverProps) {
+export function Popover({
+  trigger,
+  children,
+  align = "start",
+  placement = "bottom",
+  width,
+}: PopoverProps) {
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
 
@@ -53,9 +61,10 @@ export function Popover({ trigger, children, align = "start" }: PopoverProps) {
       {open && (
         <div
           role="dialog"
-          className={`absolute top-[calc(100%+8px)] z-40 min-w-[200px] rounded-card border border-border bg-surface p-3 shadow-[var(--shadow-card)] transition-all duration-150 ease-out ${
-            align === "end" ? "right-0" : "left-0"
-          }`}
+          style={width ? { width } : undefined}
+          className={`absolute z-40 ${width ? "" : "min-w-[200px]"} overflow-hidden rounded-card border border-border bg-surface p-3 shadow-[var(--shadow-card)] transition-all duration-150 ease-out ${
+            placement === "top" ? "bottom-[calc(100%+8px)]" : "top-[calc(100%+8px)]"
+          } ${align === "end" ? "right-0" : "left-0"}`}
         >
           {children}
         </div>

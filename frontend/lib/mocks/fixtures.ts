@@ -4,12 +4,20 @@ export const DEMO_TENANTS: DemoTenant[] = [
   {
     id: "acme-legal",
     name: "Acme Legal",
-    description: "Contract templates, data processing policy, employee handbook.",
+    description:
+      "Contract templates, data processing policy, employee handbook.",
+    documentCount: 3,
+    suggestedQuestion: "What's our PTO carryover policy?",
+    isDemo: true,
   },
   {
     id: "techcorp-handbook",
     name: "TechCorp Handbook",
-    description: "Onboarding guide, API style guide, incident response runbook.",
+    description:
+      "Onboarding guide, API style guide, incident response runbook.",
+    documentCount: 3,
+    suggestedQuestion: "How do I get repo access on day one?",
+    isDemo: true,
   },
 ];
 
@@ -62,10 +70,6 @@ export const DEMO_DOCUMENTS: Record<string, Document[]> = {
   ],
 };
 
-/**
- * A pool of realistic chunks per tenant, keyed by chunk id, used to build
- * plausible RetrievedChunk results in the chat mock.
- */
 export const DEMO_CHUNKS: Record<string, RetrievedChunk[]> = {
   "acme-legal": [
     {

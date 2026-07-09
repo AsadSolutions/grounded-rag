@@ -22,7 +22,6 @@ function sleep(ms: number, signal?: AbortSignal): Promise<void> {
   });
 }
 
-/** Splits on word boundaries but keeps leading spaces so tokens re-join into the original text. */
 function tokenize(answer: string): string[] {
   return answer.split(" ").map((word, i) => (i === 0 ? word : ` ${word}`));
 }
@@ -33,7 +32,8 @@ async function* streamTokens(
 ): AsyncGenerator<ChatEvent> {
   for (const token of tokenize(answer)) {
     await sleep(
-      TOKEN_DELAY_MIN_MS + Math.random() * (TOKEN_DELAY_MAX_MS - TOKEN_DELAY_MIN_MS),
+      TOKEN_DELAY_MIN_MS +
+        Math.random() * (TOKEN_DELAY_MAX_MS - TOKEN_DELAY_MIN_MS),
       signal,
     );
     yield { type: "token", value: token };
@@ -58,7 +58,6 @@ const includesAny = (question: string, needles: string[]) => {
 const SCENARIOS: Record<string, Scenario[]> = {
   "acme-legal": [
     {
-      // Vague query that needed a rewrite before retrieval found the right chunk.
       match: (q) => includesAny(q, ["pto", "time off"]),
       answer:
         "Employees accrue 1.25 days of paid time off per month. Unused days carry over into the next calendar year up to a cap of 10 days; anything beyond that is forfeited on January 1st. [chunk-handbook-014]",
@@ -94,8 +93,6 @@ const SCENARIOS: Record<string, Scenario[]> = {
       lowConfidence: false,
     },
     {
-      // Nothing in the corpus answers this; retrieval exhausts its rewrites and
-      // the pipeline returns its best effort flagged low confidence.
       match: (q) => includesAny(q, ["salary", "ceo", "founder equity"]),
       answer:
         "Not found in the documents. The provided sources cover time off, data processing, and vendor contract terms, but do not mention compensation or equity figures.",
@@ -109,7 +106,11 @@ const SCENARIOS: Record<string, Scenario[]> = {
           originalQuery: "ceo salary",
           rewrittenQuery: "executive compensation figures",
         },
-        { step: "retrieve", query: "executive compensation figures", chunks: [] },
+        {
+          step: "retrieve",
+          query: "executive compensation figures",
+          chunks: [],
+        },
         { step: "grade", grades: [] },
         {
           step: "rewrite",
@@ -139,7 +140,8 @@ const SCENARIOS: Record<string, Scenario[]> = {
   ],
   "techcorp-handbook": [
     {
-      match: (q) => includesAny(q, ["repository access", "repo access", "day one"]),
+      match: (q) =>
+        includesAny(q, ["repository access", "repo access", "day one"]),
       answer:
         "New engineers receive read access to all repositories on day one, and write access after completing the security training module, typically by the end of week one. [chunk-onboarding-003]",
       sources: [DEMO_CHUNKS["techcorp-handbook"][0]],

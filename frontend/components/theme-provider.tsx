@@ -1,6 +1,12 @@
 "use client";
 
-import { createContext, useCallback, useContext, useEffect, useState } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useState,
+} from "react";
 import {
   applyTheme,
   getStoredTheme,
@@ -16,13 +22,11 @@ type ThemeContextValue = {
 const ThemeContext = createContext<ThemeContextValue | null>(null);
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [preference, setPreferenceState] = useState<ThemePreference | null>(null);
+  const [preference, setPreferenceState] = useState<ThemePreference | null>(
+    null,
+  );
 
   useEffect(() => {
-    // One-time bootstrap: sync React state from localStorage after mount, since
-    // localStorage isn't available during SSR (the blocking script in layout.tsx
-    // already set the correct .dark class before this runs, so no flash occurs).
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     setPreferenceState(getStoredTheme());
   }, []);
 
@@ -43,7 +47,9 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   return (
-    <ThemeContext.Provider value={{ preference: preference ?? "system", setPreference }}>
+    <ThemeContext.Provider
+      value={{ preference: preference ?? "system", setPreference }}
+    >
       {children}
     </ThemeContext.Provider>
   );

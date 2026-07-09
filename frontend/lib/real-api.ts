@@ -29,13 +29,22 @@ async function apiJson<T>(path: string, init?: RequestInit): Promise<T> {
   return response.json() as Promise<T>;
 }
 
-// --- REST response shapes (backend is Pydantic/FastAPI, snake_case JSON) ---
-// mapped to the camelCase types in lib/types.ts so nothing outside this file
-// deals with the wire format.
-
-type DemoTenantResponse = { id: string; name: string; description: string };
+type DemoTenantResponse = {
+  id: string;
+  name: string;
+  description: string;
+  document_count: number;
+  suggested_question: string;
+};
 function toDemoTenant(raw: DemoTenantResponse): DemoTenant {
-  return { id: raw.id, name: raw.name, description: raw.description };
+  return {
+    id: raw.id,
+    name: raw.name,
+    description: raw.description,
+    documentCount: raw.document_count,
+    suggestedQuestion: raw.suggested_question,
+    isDemo: true,
+  };
 }
 
 type TenantResponse = { tenant_id: string; name: string; expires_at?: string };
@@ -79,7 +88,11 @@ function toChunk(raw: ChunkResponse): RetrievedChunk {
   };
 }
 
-type ChunkGradeResponse = { chunk_id: string; relevant: boolean; reason?: string };
+type ChunkGradeResponse = {
+  chunk_id: string;
+  relevant: boolean;
+  reason?: string;
+};
 function toGrade(raw: ChunkGradeResponse): ChunkGrade {
   return { chunkId: raw.chunk_id, relevant: raw.relevant, reason: raw.reason };
 }
@@ -103,7 +116,11 @@ type TraceEntryResponse =
 function toTraceEntry(raw: TraceEntryResponse): TraceEntry {
   switch (raw.step) {
     case "retrieve":
-      return { step: "retrieve", query: raw.query, chunks: raw.chunks.map(toChunk) };
+      return {
+        step: "retrieve",
+        query: raw.query,
+        chunks: raw.chunks.map(toChunk),
+      };
     case "grade":
       return { step: "grade", grades: raw.grades.map(toGrade) };
     case "rewrite":
@@ -174,7 +191,6 @@ async function uploadDocument(
   formData.append("tenant_id", tenantId);
   formData.append("file", file);
 
-  // XHR is used instead of fetch here because fetch has no upload progress API.
   return new Promise((resolve, reject) => {
     const xhr = new XMLHttpRequest();
     xhr.open("POST", `${API_BASE_URL}/api/documents`);
@@ -186,7 +202,9 @@ async function uploadDocument(
     };
 
     xhr.onerror = () => {
-      reject(new Error("GroundedRAG API POST /api/documents failed: network error"));
+      reject(
+        new Error("GroundedRAG API POST /api/documents failed: network error"),
+      );
     };
 
     xhr.onload = () => {
@@ -205,7 +223,10 @@ async function uploadDocument(
   });
 }
 
-async function deleteDocument(tenantId: string, documentId: string): Promise<void> {
+async function deleteDocument(
+  tenantId: string,
+  documentId: string,
+): Promise<void> {
   await apiFetch(
     `/api/documents/${encodeURIComponent(documentId)}?tenant_id=${encodeURIComponent(tenantId)}`,
     { method: "DELETE" },
@@ -294,8 +315,6 @@ async function* chat(
     if (err instanceof DOMException && err.name === "AbortError") {
       return;
     }
-    // The stream is already mid-render for the user, so surface this as a
-    // typed event instead of an unhandled rejection.
     yield {
       type: "error",
       message: err instanceof Error ? err.message : "Unknown streaming error.",

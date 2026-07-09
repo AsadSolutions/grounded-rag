@@ -3,15 +3,43 @@
 import type { ReactNode } from "react";
 import { useFocusTrap } from "./use-focus-trap";
 
+type DrawerSide = "right" | "left" | "bottom";
+
 type DrawerProps = {
   open: boolean;
   onClose: () => void;
   title: string;
   children: ReactNode;
+  side?: DrawerSide;
 };
 
-export function Drawer({ open, onClose, title, children }: DrawerProps) {
+const sidePositionClasses: Record<DrawerSide, string> = {
+  right: "right-0 top-0 h-full w-[420px] max-w-[90vw] border-l",
+  left: "left-0 top-0 h-full w-[280px] max-w-[85vw] border-r",
+  bottom: "bottom-0 left-0 w-full max-h-[85vh] border-t",
+};
+
+const sideTransformClasses: Record<DrawerSide, { open: string; closed: string }> = {
+  right: { open: "translate-x-0", closed: "translate-x-full" },
+  left: { open: "translate-x-0", closed: "-translate-x-full" },
+  bottom: { open: "translate-y-0", closed: "translate-y-full" },
+};
+
+const sideContentClasses: Record<DrawerSide, string> = {
+  right: "h-[calc(100%-61px)] overflow-y-auto p-5",
+  left: "h-[calc(100%-61px)] overflow-y-auto p-5",
+  bottom: "max-h-[calc(85vh-61px)] overflow-y-auto p-5",
+};
+
+export function Drawer({
+  open,
+  onClose,
+  title,
+  children,
+  side = "right",
+}: DrawerProps) {
   const containerRef = useFocusTrap(open, onClose);
+  const transform = sideTransformClasses[side];
 
   return (
     <div
@@ -31,23 +59,21 @@ export function Drawer({ open, onClose, title, children }: DrawerProps) {
         aria-label={title}
         tabIndex={-1}
         inert={!open}
-        className={`absolute right-0 top-0 h-full w-[420px] max-w-[90vw] border-l border-border bg-surface transition-transform duration-150 ease-out focus:outline-none ${
-          open ? "translate-x-0" : "translate-x-full"
-        }`}
+        className={`absolute border-border bg-surface transition-transform duration-150 ease-out focus:outline-none ${
+          sidePositionClasses[side]
+        } ${open ? transform.open : transform.closed}`}
       >
         <div className="flex items-center justify-between border-b border-border px-5 py-4">
           <h2 className="font-serif text-[18px] text-text">{title}</h2>
           <button
             onClick={onClose}
             aria-label="Close"
-            className="rounded-button p-1.5 text-muted transition-colors duration-150 ease-out hover:bg-surface-2 hover:text-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+            className="cursor-pointer rounded-button p-1.5 text-muted transition-colors duration-150 ease-out hover:bg-surface-2 hover:text-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
           >
             <CloseIcon />
           </button>
         </div>
-        <div className="h-[calc(100%-61px)] overflow-y-auto p-5">
-          {children}
-        </div>
+        <div className={sideContentClasses[side]}>{children}</div>
       </div>
     </div>
   );

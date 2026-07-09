@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
 import { Inter, JetBrains_Mono, Lora } from "next/font/google";
-import Script from "next/script";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
-import { MockDataPill } from "@/components/mock-data-pill";
 import { THEME_INIT_SCRIPT } from "@/lib/theme";
+import { ToastProvider } from "@/lib/toast-context";
+import { ScratchTenantProvider } from "@/lib/scratch-tenant-context";
+import { SettingsProvider } from "@/lib/settings-context";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -38,17 +39,21 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${inter.variable} ${lora.variable} ${jetbrainsMono.variable} h-full`}
+      className={`${inter.variable} ${lora.variable} ${jetbrainsMono.variable} h-full scroll-smooth`}
+      data-scroll-behavior="smooth"
       suppressHydrationWarning
     >
       <head>
-        <Script id="theme-init" strategy="beforeInteractive">
-          {THEME_INIT_SCRIPT}
-        </Script>
+        <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
       </head>
       <body className="min-h-full flex flex-col antialiased">
-        <ThemeProvider>{children}</ThemeProvider>
-        <MockDataPill />
+        <ThemeProvider>
+          <ToastProvider>
+            <ScratchTenantProvider>
+              <SettingsProvider>{children}</SettingsProvider>
+            </ScratchTenantProvider>
+          </ToastProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

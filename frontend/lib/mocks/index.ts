@@ -12,9 +12,11 @@ import { MOCK_EVAL_RESULTS } from "./eval";
 
 const SCRATCH_TENANT_TTL_MS = 24 * 60 * 60 * 1000;
 
-/** In-memory store seeded from fixtures, mutated by upload/delete within a session. */
 const documentsByTenant: Record<string, Document[]> = Object.fromEntries(
-  Object.entries(DEMO_DOCUMENTS).map(([tenantId, docs]) => [tenantId, [...docs]]),
+  Object.entries(DEMO_DOCUMENTS).map(([tenantId, docs]) => [
+    tenantId,
+    [...docs],
+  ]),
 );
 
 let scratchTenantCount = 0;

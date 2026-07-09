@@ -1,17 +1,15 @@
-// Single source of truth for every type shared between lib/api.ts, lib/real-api.ts,
-// lib/mocks/, and the components that consume them. Mirrors the GraphState fields
-// and node list documented in docs/ARCHITECTURE.md.
-
 export type DemoTenant = {
   id: string;
   name: string;
   description: string;
+  documentCount: number;
+  suggestedQuestion: string;
+  isDemo: boolean;
 };
 
 export type Tenant = {
   id: string;
   name: string;
-  /** ISO 8601 timestamp. Present for scratch tenants, absent for demo tenants. */
   expiresAt?: string;
 };
 
@@ -20,7 +18,6 @@ export type Document = {
   tenantId: string;
   name: string;
   chunkCount: number;
-  /** ISO 8601 timestamp. */
   uploadedAt: string;
 };
 
@@ -76,9 +73,7 @@ export type EvalMetric = {
 };
 
 export type EvalResults = {
-  /** ISO 8601 timestamp of the eval run. */
   generatedAt: string;
-  /** True when these numbers are illustrative sample data, not a real eval run. */
   sample: boolean;
   metrics: EvalMetric[];
 };
