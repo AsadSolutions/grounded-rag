@@ -20,22 +20,27 @@ def _cited_chunks(state: GraphState) -> list:
 
 
 async def _event_stream(request: ChatRequest) -> AsyncIterator[dict]:
-    initial_state = GraphState(question=request.question, tenant_id=request.tenant_id)
-    result = GraphState(**await run_in_threadpool(_graph.invoke, initial_state))
+    try:
+        initial_state = GraphState(question=request.question, tenant_id=request.tenant_id)
+        result = GraphState(**await run_in_threadpool(_graph.invoke, initial_state))
 
-    words = result.answer.split(" ") if result.answer else []
-    for index, word in enumerate(words):
-        token = word if index == len(words) - 1 else f"{word} "
-        yield {"event": "token", "data": json.dumps({"token": token})}
+        words = result.answer.split(" ") if result.answer else []
+        for index, word in enumerate(words):
+            token = word if index == len(words) - 1 else f"{word} "
+            yield {"event": "token", "data": json.dumps({"token": token})}
 
-    sources = [c.model_dump() for c in _cited_chunks(result)]
-    yield {"event": "sources", "data": json.dumps(sources)}
+        sources = [c.model_dump() for c in _cited_chunks(result)]
+        yield {"event": "sources", "data": json.dumps(sources)}
 
-    trace_payload = {
-        "low_confidence": result.low_confidence,
-        "entries": [entry.model_dump() for entry in result.trace],
-    }
-    yield {"event": "trace", "data": json.dumps(trace_payload)}
+        trace_payload = {
+            "low_confidence": result.low_confidence,
+            "rewrite_count": result.rewrite_count,
+            "regenerated": result.regenerated,
+            "entries": [entry.model_dump() for entry in result.trace],
+        }
+        yield {"event": "trace", "data": json.dumps(trace_payload)}
+    except Exception as exc:
+        yield {"event": "error", "data": json.dumps({"message": str(exc)})}
 
 
 @router.post("/api/chat")

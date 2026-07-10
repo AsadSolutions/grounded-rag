@@ -103,5 +103,14 @@ function TraceStep({ step }: { step: TraceEntry }) {
           )}
         </div>
       );
+    case "log":
+      return (
+        <div className="flex flex-col gap-2">
+          <p className="text-[11px] font-medium uppercase tracking-[0.08em] text-muted">
+            {step.node}
+          </p>
+          <p className="text-[13px] text-text">{step.message}</p>
+        </div>
+      );
   }
 }

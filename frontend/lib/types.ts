@@ -18,7 +18,7 @@ export type Document = {
   tenantId: string;
   name: string;
   chunkCount: number;
-  uploadedAt: string;
+  uploadedAt: string | null;
 };
 
 export type RetrievedChunk = {
@@ -50,7 +50,8 @@ export type TraceEntry =
       step: "groundedness_check";
       verdict: "grounded" | "not_grounded";
       reason?: string;
-    };
+    }
+  | { step: "log"; node: string; message: string };
 
 export type ChatTrace = {
   steps: TraceEntry[];

@@ -1,7 +1,6 @@
 import type {
   ApiClient,
   ChatEvent,
-  ChunkGrade,
   DemoTenant,
   Document,
   EvalResults,
@@ -11,7 +10,7 @@ import type {
 } from "@/lib/types";
 
 export const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8000";
+  process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
 
 async function apiFetch(path: string, init?: RequestInit): Promise<Response> {
   const response = await fetch(`${API_BASE_URL}${path}`, init);
@@ -57,7 +56,7 @@ type DocumentResponse = {
   tenant_id: string;
   name: string;
   chunk_count: number;
-  uploaded_at: string;
+  uploaded_at: string | null;
 };
 function toDocument(raw: DocumentResponse): Document {
   return {
@@ -66,6 +65,26 @@ function toDocument(raw: DocumentResponse): Document {
     name: raw.name,
     chunkCount: raw.chunk_count,
     uploadedAt: raw.uploaded_at,
+  };
+}
+
+// POST /api/documents returns an IngestResult, not a DocumentSummary: it
+// carries doc_id/doc_name instead of id/name and has no uploaded_at at all
+// (the timestamp lives on the Qdrant chunk payloads written during ingest,
+// not on the response). The upload just happened, so "now" is accurate.
+type IngestResultResponse = {
+  doc_id: string;
+  doc_name: string;
+  tenant_id: string;
+  chunk_count: number;
+};
+function toDocumentFromIngestResult(raw: IngestResultResponse): Document {
+  return {
+    id: raw.doc_id,
+    tenantId: raw.tenant_id,
+    name: raw.doc_name,
+    chunkCount: raw.chunk_count,
+    uploadedAt: new Date().toISOString(),
   };
 }
 
@@ -88,57 +107,16 @@ function toChunk(raw: ChunkResponse): RetrievedChunk {
   };
 }
 
-type ChunkGradeResponse = {
-  chunk_id: string;
-  relevant: boolean;
-  reason?: string;
-};
-function toGrade(raw: ChunkGradeResponse): ChunkGrade {
-  return { chunkId: raw.chunk_id, relevant: raw.relevant, reason: raw.reason };
-}
-
-type TraceEntryResponse =
-  | { step: "retrieve"; query: string; chunks: ChunkResponse[] }
-  | { step: "grade"; grades: ChunkGradeResponse[] }
-  | {
-      step: "rewrite";
-      attempt: number;
-      original_query: string;
-      rewritten_query: string;
-    }
-  | { step: "generate"; attempt: number }
-  | {
-      step: "groundedness_check";
-      verdict: "grounded" | "not_grounded";
-      reason?: string;
-    };
+// The live graph's trace is a flat log — each node appends one
+// {node, message} entry (see backend/app/graph/nodes.py) — not the
+// step-typed, data-carrying union the mocks use to drive a richer replay
+// UI. There is no per-step query/chunks/grades/verdict to recover from a
+// free-text message, so real entries map onto a "log" line instead of
+// being reconstructed into the richer mock-only step shapes.
+type TraceEntryResponse = { node: string; message: string };
 
 function toTraceEntry(raw: TraceEntryResponse): TraceEntry {
-  switch (raw.step) {
-    case "retrieve":
-      return {
-        step: "retrieve",
-        query: raw.query,
-        chunks: raw.chunks.map(toChunk),
-      };
-    case "grade":
-      return { step: "grade", grades: raw.grades.map(toGrade) };
-    case "rewrite":
-      return {
-        step: "rewrite",
-        attempt: raw.attempt,
-        originalQuery: raw.original_query,
-        rewrittenQuery: raw.rewritten_query,
-      };
-    case "generate":
-      return { step: "generate", attempt: raw.attempt };
-    case "groundedness_check":
-      return {
-        step: "groundedness_check",
-        verdict: raw.verdict,
-        reason: raw.reason,
-      };
-  }
+  return { step: "log", node: raw.node, message: raw.message };
 }
 
 type EvalMetricResponse = {
@@ -216,7 +194,11 @@ async function uploadDocument(
         );
         return;
       }
-      resolve(toDocument(JSON.parse(xhr.responseText) as DocumentResponse));
+      resolve(
+        toDocumentFromIngestResult(
+          JSON.parse(xhr.responseText) as IngestResultResponse,
+        ),
+      );
     };
 
     xhr.send(formData);
@@ -233,10 +215,13 @@ async function deleteDocument(
   );
 }
 
-function parseSseFrame(rawFrame: string): ChatEvent {
-  let eventName = "message";
+function parseSseFrame(rawFrame: string): ChatEvent | null {
+  let eventName: string | null = null;
   const dataLines: string[] = [];
   for (const line of rawFrame.split("\n")) {
+    // SSE comment line — sse-starlette sends ": ping - <timestamp>" to
+    // keep the connection alive. Not a real event.
+    if (line.startsWith(":")) continue;
     if (line.startsWith("event:")) {
       eventName = line.slice("event:".length).trim();
     } else if (line.startsWith("data:")) {
@@ -244,22 +229,32 @@ function parseSseFrame(rawFrame: string): ChatEvent {
     }
   }
 
+  if (eventName === null) {
+    return null;
+  }
+
   const raw = dataLines.join("\n");
   const payload = raw ? JSON.parse(raw) : {};
 
   switch (eventName) {
+    // token event data is {"token": "..."} — the field is "token", not "value".
     case "token":
-      return { type: "token", value: payload.value };
+      return { type: "token", value: payload.token };
+    // sources event data is a bare JSON array of chunk dicts, not
+    // {"chunks": [...]}.
     case "sources":
       return {
         type: "sources",
-        chunks: (payload.chunks as ChunkResponse[]).map(toChunk),
+        chunks: (payload as ChunkResponse[]).map(toChunk),
       };
+    // trace event data is {low_confidence, rewrite_count, regenerated,
+    // entries: [{node, message}, ...]} — a flat log, not a "steps" array
+    // of rich, per-node-type objects.
     case "trace":
       return {
         type: "trace",
         trace: {
-          steps: (payload.steps as TraceEntryResponse[]).map(toTraceEntry),
+          steps: (payload.entries as TraceEntryResponse[]).map(toTraceEntry),
           rewriteCount: payload.rewrite_count,
           regenerated: payload.regenerated,
           lowConfidence: payload.low_confidence,
@@ -299,14 +294,19 @@ async function* chat(
     while (true) {
       const { done, value } = await reader.read();
       if (done) break;
-      buffer += decoder.decode(value, { stream: true });
+      // sse-starlette terminates every line with CRLF, so frames are
+      // separated by "\r\n\r\n", not a bare "\n\n" — normalize before
+      // splitting or frame boundaries are never found and the stream
+      // silently yields nothing.
+      buffer += decoder.decode(value, { stream: true }).replace(/\r\n/g, "\n");
 
       let boundary = buffer.indexOf("\n\n");
       while (boundary !== -1) {
         const rawFrame = buffer.slice(0, boundary);
         buffer = buffer.slice(boundary + 2);
         if (rawFrame.trim().length > 0) {
-          yield parseSseFrame(rawFrame);
+          const event = parseSseFrame(rawFrame);
+          if (event) yield event;
         }
         boundary = buffer.indexOf("\n\n");
       }

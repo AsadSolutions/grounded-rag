@@ -120,6 +120,47 @@ def test_chat_trace_event_reports_low_confidence_flag(monkeypatch):
     assert any(entry["node"] == "groundedness_check" for entry in trace_payload["entries"])
 
 
+def test_chat_trace_event_reports_rewrite_count_and_regenerated(monkeypatch):
+    _wire_fake_graph(
+        monkeypatch,
+        generate_fn=lambda question, chunks, failure_reason=None: "answer",
+        check_fn=lambda answer, chunks: (True, "fully supported"),
+        grade_fn=lambda question, chunks: [
+            ChunkGrade(chunk_id=c.chunk_id, relevant=False, reason="") for c in chunks
+        ],
+    )
+    api = TestClient(app)
+
+    response = api.post("/api/chat", json={"tenant_id": "t1", "question": "q"})
+
+    import json
+
+    events = _parse_sse(response.text)
+    trace_payload = json.loads(next(e["data"] for e in events if e["event"] == "trace"))
+    assert trace_payload["rewrite_count"] == 2
+    assert trace_payload["regenerated"] is False
+
+
+def test_chat_emits_error_event_instead_of_dying_silently(monkeypatch):
+    def _boom(question, chunks, failure_reason=None):
+        raise RuntimeError("openai is down")
+
+    _wire_fake_graph(
+        monkeypatch,
+        generate_fn=_boom,
+        check_fn=lambda answer, chunks: (True, "fully supported"),
+    )
+    api = TestClient(app)
+
+    response = api.post("/api/chat", json={"tenant_id": "t1", "question": "q"})
+
+    import json
+
+    events = _parse_sse(response.text)
+    assert [e["event"] for e in events] == ["error"]
+    assert "openai is down" in json.loads(events[0]["data"])["message"]
+
+
 def test_chat_rejects_missing_question(monkeypatch):
     _wire_fake_graph(
         monkeypatch,

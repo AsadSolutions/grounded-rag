@@ -114,7 +114,9 @@ export function DocumentsPanel({
               </div>
               <p className="mt-1 text-[13px] text-muted">
                 {doc.chunkCount} chunks ·{" "}
-                {new Date(doc.uploadedAt).toLocaleDateString()}
+                {doc.uploadedAt
+                  ? new Date(doc.uploadedAt).toLocaleDateString()
+                  : "seeded"}
               </p>
             </li>
           ))}
