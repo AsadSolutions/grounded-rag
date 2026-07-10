@@ -1,4 +1,5 @@
 import uuid
+from datetime import datetime, timezone
 
 import tiktoken
 
@@ -25,6 +26,7 @@ def chunk_text(
     chunks: list[Chunk] = []
     start = 0
     index = 0
+    uploaded_at = datetime.now(timezone.utc).isoformat()
     while True:
         window = tokens[start : start + chunk_size]
         chunks.append(
@@ -36,6 +38,7 @@ def chunk_text(
                 chunk_index=index,
                 text=_ENCODING.decode(window),
                 content_hash=content_hash,
+                uploaded_at=uploaded_at,
             )
         )
         if start + chunk_size >= len(tokens):

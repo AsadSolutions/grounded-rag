@@ -9,6 +9,7 @@ class Chunk(BaseModel):
     chunk_index: int
     text: str
     content_hash: str | None = None
+    uploaded_at: str | None = None
 
 
 class ScoredChunk(Chunk):
@@ -50,3 +51,38 @@ class GraphState(BaseModel):
 class ChatRequest(BaseModel):
     tenant_id: str
     question: str
+
+
+class DocumentSummary(BaseModel):
+    id: str
+    tenant_id: str
+    name: str
+    chunk_count: int
+    uploaded_at: str | None = None
+
+
+class TenantResponse(BaseModel):
+    tenant_id: str
+    name: str
+    expires_at: str
+
+
+class DemoTenantResponse(BaseModel):
+    id: str
+    name: str
+    description: str
+    document_count: int
+    suggested_question: str
+
+
+class EvalMetric(BaseModel):
+    name: str
+    with_correction: float
+    without_correction: float
+    delta: float
+
+
+class EvalResultsResponse(BaseModel):
+    generated_at: str
+    sample: bool
+    metrics: list[EvalMetric]

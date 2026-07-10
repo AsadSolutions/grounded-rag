@@ -1,6 +1,9 @@
+from datetime import datetime, timezone
+
 import tiktoken
 
 from app.ingest.chunk import chunk_text
+from app.models import Chunk
 
 _ENCODING = tiktoken.get_encoding("cl100k_base")
 
@@ -56,3 +59,27 @@ def test_content_hash_is_stamped_onto_every_chunk_when_given():
 
     assert len(chunks) > 1
     assert all(c.content_hash == "abc123" for c in chunks)
+
+
+def test_chunk_text_stamps_uploaded_at():
+    chunks = chunk_text("hello world", tenant_id="t1", doc_id="d1", doc_name="a.txt")
+
+    assert chunks[0].uploaded_at is not None
+    parsed = datetime.fromisoformat(chunks[0].uploaded_at)
+    assert parsed.tzinfo is not None
+
+
+def test_parses_legacy_payload_without_uploaded_at():
+    legacy_payload = {
+        "chunk_id": "c1",
+        "tenant_id": "t1",
+        "doc_id": "d1",
+        "doc_name": "doc.txt",
+        "chunk_index": 0,
+        "text": "hi",
+        "content_hash": "abc123",
+    }
+
+    chunk = Chunk(**legacy_payload)
+
+    assert chunk.uploaded_at is None
