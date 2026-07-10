@@ -89,8 +89,8 @@ class _GroundednessExtraction(BaseModel):
     unsupported_claims: list[str]
 
 
-def check_groundedness_llm(answer: str, chunks: list[ScoredChunk]) -> tuple[bool, str]:
-    """Returns (grounded, reason). `grounded` is derived in code from whether the model's
+def check_groundedness_llm(answer: str, chunks: list[ScoredChunk]) -> tuple[bool, str, list[str]]:
+    """Returns (grounded, reason, unsupported_claims). `grounded` is derived in code from whether the model's
     unsupported_claims list is empty, rather than asked of the model directly — an earlier
     version had the model produce grounded as its own field and it periodically contradicted
     its own claims list (grounded=false with an empty list, or vice versa) because structured
@@ -131,19 +131,28 @@ def check_groundedness_llm(answer: str, chunks: list[ScoredChunk]) -> tuple[bool
     extraction = response.choices[0].message.parsed
     grounded = len(extraction.unsupported_claims) == 0
     reason = "Fully supported." if grounded else "Unsupported claims: " + "; ".join(extraction.unsupported_claims)
-    return grounded, reason
+    return grounded, reason, extraction.unsupported_claims
 
 
 def retrieve(state: GraphState, *, search_fn=hybrid_search) -> GraphState:
     chunks = search_fn(state.tenant_id, state.question, k=6)
-    trace_entry = TraceEntry(node="retrieve", message=f"Retrieved {len(chunks)} chunk(s) for: {state.question!r}")
+    trace_entry = TraceEntry(
+        node="retrieve",
+        message=f"Retrieved {len(chunks)} chunk(s) for: {state.question!r}",
+        query=state.question,
+        chunk_ids=[c.chunk_id for c in chunks],
+    )
     return state.model_copy(update={"retrieved_chunks": chunks, "trace": [*state.trace, trace_entry]})
 
 
 def grade(state: GraphState, *, grade_fn=grade_chunks_llm) -> GraphState:
     grades = grade_fn(state.question, state.retrieved_chunks)
     relevant_count = sum(1 for g in grades if g.relevant)
-    trace_entry = TraceEntry(node="grade", message=f"Graded {len(grades)} chunk(s): {relevant_count} relevant")
+    trace_entry = TraceEntry(
+        node="grade",
+        message=f"Graded {len(grades)} chunk(s): {relevant_count} relevant",
+        grades=grades,
+    )
     return state.model_copy(update={"grades": grades, "trace": [*state.trace, trace_entry]})
 
 
@@ -158,7 +167,12 @@ def route_after_grade(state: GraphState) -> str:
 
 def rewrite(state: GraphState, *, rewrite_fn=rewrite_query_llm) -> GraphState:
     new_question = rewrite_fn(state.question)
-    trace_entry = TraceEntry(node="rewrite", message=f"Rewrote question to: {new_question!r}")
+    trace_entry = TraceEntry(
+        node="rewrite",
+        message=f"Rewrote question to: {new_question!r}",
+        old_query=state.question,
+        new_query=new_question,
+    )
     return state.model_copy(
         update={
             "question": new_question,
@@ -182,7 +196,7 @@ def generate(state: GraphState, *, generate_fn=generate_answer_llm) -> GraphStat
     answer = generate_fn(state.question, relevant, failure_reason=state.groundedness_failure_reason)
     is_regeneration = state.groundedness_failure_reason is not None
     message = "Generated answer" + (" after regeneration" if is_regeneration else "")
-    trace_entry = TraceEntry(node="generate", message=message)
+    trace_entry = TraceEntry(node="generate", message=message, is_regeneration=is_regeneration)
     return state.model_copy(
         update={
             "answer": answer,
@@ -195,10 +209,13 @@ def generate(state: GraphState, *, generate_fn=generate_answer_llm) -> GraphStat
 
 def groundedness_check(state: GraphState, *, check_fn=check_groundedness_llm) -> GraphState:
     relevant, _ = _relevant_chunks(state)
-    grounded, reason = check_fn(state.answer, relevant)
+    grounded, reason, unsupported_claims = check_fn(state.answer, relevant)
     exhausted_regeneration = state.regenerated
     trace_entry = TraceEntry(
-        node="groundedness_check", message=f"{'Grounded' if grounded else 'NOT grounded'}: {reason}"
+        node="groundedness_check",
+        message=f"{'Grounded' if grounded else 'NOT grounded'}: {reason}",
+        grounded=grounded,
+        unsupported_claims=unsupported_claims,
     )
     return state.model_copy(
         update={

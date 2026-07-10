@@ -39,6 +39,8 @@ def test_retrieve_sets_chunks_and_appends_trace():
     assert result.retrieved_chunks == fake_chunks
     assert len(result.trace) == 1
     assert result.trace[0].node == "retrieve"
+    assert result.trace[0].query == "what is the policy"
+    assert result.trace[0].chunk_ids == ["c1", "c2"]
 
 
 def test_retrieve_uses_current_question_and_tenant(monkeypatch):
@@ -67,6 +69,7 @@ def test_grade_sets_grades_and_appends_trace():
     assert result.grades == fake_grades
     assert len(result.trace) == 1
     assert result.trace[0].node == "grade"
+    assert result.trace[0].grades == fake_grades
 
 
 # ---- route_after_grade ----
@@ -112,6 +115,8 @@ def test_rewrite_updates_question_and_increments_count_and_appends_trace():
     assert result.rewrite_count == 1
     assert len(result.trace) == 1
     assert result.trace[0].node == "rewrite"
+    assert result.trace[0].old_query == "pto"
+    assert result.trace[0].new_query == "what is the paid time off policy"
 
 
 # ---- generate ----
@@ -135,6 +140,7 @@ def test_generate_uses_only_relevant_chunks_and_sets_answer():
     assert seen["failure_reason"] is None
     assert len(result.trace) == 1
     assert result.trace[0].node == "generate"
+    assert result.trace[0].is_regeneration is False
 
 
 def test_generate_flags_low_confidence_when_fewer_than_two_relevant_chunks():
@@ -173,6 +179,7 @@ def test_generate_marks_regenerated_when_called_with_a_failure_reason():
 
     assert result.answer == "second attempt"
     assert result.regenerated is True
+    assert result.trace[0].is_regeneration is True
 
 
 # ---- groundedness_check ----
@@ -181,27 +188,38 @@ def test_generate_marks_regenerated_when_called_with_a_failure_reason():
 def test_groundedness_check_records_grounded_verdict():
     state = _state(answer="the policy is X", retrieved_chunks=[_chunk("c1")], grades=[ChunkGrade(chunk_id="c1", relevant=True, reason="")])
 
-    result = groundedness_check(state, check_fn=lambda answer, chunks: (True, "fully supported"))
+    result = groundedness_check(state, check_fn=lambda answer, chunks: (True, "fully supported", []))
 
     assert result.groundedness is True
     assert result.groundedness_failure_reason is None
     assert len(result.trace) == 1
     assert result.trace[0].node == "groundedness_check"
+    assert result.trace[0].grounded is True
+    assert result.trace[0].unsupported_claims == []
 
 
 def test_groundedness_check_records_failure_reason_when_not_grounded():
     state = _state(answer="the policy is X", retrieved_chunks=[_chunk("c1")], grades=[ChunkGrade(chunk_id="c1", relevant=True, reason="")])
 
-    result = groundedness_check(state, check_fn=lambda answer, chunks: (False, "claims a number not present in sources"))
+    result = groundedness_check(
+        state,
+        check_fn=lambda answer, chunks: (
+            False,
+            "claims a number not present in sources",
+            ["claims a number not present in sources"],
+        ),
+    )
 
     assert result.groundedness is False
     assert result.groundedness_failure_reason == "claims a number not present in sources"
+    assert result.trace[0].grounded is False
+    assert result.trace[0].unsupported_claims == ["claims a number not present in sources"]
 
 
 def test_groundedness_check_sets_low_confidence_when_exhausted_after_regeneration():
     state = _state(answer="answer", retrieved_chunks=[_chunk("c1")], regenerated=True)
 
-    result = groundedness_check(state, check_fn=lambda answer, chunks: (False, "still not grounded"))
+    result = groundedness_check(state, check_fn=lambda answer, chunks: (False, "still not grounded", ["still not grounded"]))
 
     assert result.low_confidence is True
 
@@ -209,7 +227,7 @@ def test_groundedness_check_sets_low_confidence_when_exhausted_after_regeneratio
 def test_groundedness_check_does_not_flag_low_confidence_on_first_failure():
     state = _state(answer="answer", retrieved_chunks=[_chunk("c1")], regenerated=False)
 
-    result = groundedness_check(state, check_fn=lambda answer, chunks: (False, "not grounded yet"))
+    result = groundedness_check(state, check_fn=lambda answer, chunks: (False, "not grounded yet", ["not grounded yet"]))
 
     assert result.low_confidence is False
 

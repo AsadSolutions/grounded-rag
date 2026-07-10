@@ -32,6 +32,14 @@ class ChunkGrade(BaseModel):
 class TraceEntry(BaseModel):
     node: str
     message: str
+    query: str | None = None
+    chunk_ids: list[str] | None = None
+    grades: list[ChunkGrade] | None = None
+    old_query: str | None = None
+    new_query: str | None = None
+    is_regeneration: bool | None = None
+    grounded: bool | None = None
+    unsupported_claims: list[str] | None = None
 
 
 class GraphState(BaseModel):

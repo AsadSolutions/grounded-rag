@@ -29,7 +29,7 @@ def test_graph_answers_directly_when_retrieval_is_immediately_good():
         search_fn=lambda tenant_id, query, k=6: [_chunk("c1"), _chunk("c2")],
         grade_fn=lambda question, chunks: [ChunkGrade(chunk_id=c.chunk_id, relevant=True, reason="") for c in chunks],
         generate_fn=lambda question, chunks, failure_reason=None: "the answer",
-        check_fn=lambda answer, chunks: (True, "fully supported"),
+        check_fn=lambda answer, chunks: (True, "fully supported", []),
     )
 
     assert result.answer == "the answer"
@@ -55,7 +55,7 @@ def test_graph_rewrites_once_then_succeeds():
         grade_fn=fake_grade,
         rewrite_fn=lambda question: "what is the paid time off policy",
         generate_fn=lambda question, chunks, failure_reason=None: "the answer",
-        check_fn=lambda answer, chunks: (True, "fully supported"),
+        check_fn=lambda answer, chunks: (True, "fully supported", []),
     )
 
     assert result.rewrite_count == 1
@@ -72,6 +72,41 @@ def test_graph_rewrites_once_then_succeeds():
     ]
 
 
+def test_graph_trace_carries_per_chunk_grades_and_both_queries_on_rewrite_path():
+    grade_calls = {"count": 0}
+
+    def fake_grade(question, chunks):
+        grade_calls["count"] += 1
+        relevant = grade_calls["count"] >= 2
+        return [ChunkGrade(chunk_id=c.chunk_id, relevant=relevant, reason="") for c in chunks]
+
+    state = GraphState(question="pto?", tenant_id="t1")
+
+    result = _run(
+        state,
+        search_fn=lambda tenant_id, query, k=6: [_chunk("c1"), _chunk("c2")],
+        grade_fn=fake_grade,
+        rewrite_fn=lambda question: "what is the paid time off policy",
+        generate_fn=lambda question, chunks, failure_reason=None: "the answer",
+        check_fn=lambda answer, chunks: (True, "fully supported", []),
+    )
+
+    grade_entries = [t for t in result.trace if t.node == "grade"]
+    assert len(grade_entries) == 2
+    for entry in grade_entries:
+        assert [g.chunk_id for g in entry.grades] == ["c1", "c2"]
+    assert grade_entries[0].grades[0].relevant is False
+    assert grade_entries[1].grades[0].relevant is True
+
+    rewrite_entry = next(t for t in result.trace if t.node == "rewrite")
+    assert rewrite_entry.old_query == "pto?"
+    assert rewrite_entry.new_query == "what is the paid time off policy"
+
+    groundedness_entry = next(t for t in result.trace if t.node == "groundedness_check")
+    assert groundedness_entry.grounded is True
+    assert groundedness_entry.unsupported_claims == []
+
+
 def test_graph_never_exceeds_two_rewrites_and_still_finishes():
     state = GraphState(question="vague", tenant_id="t1")
 
@@ -81,7 +116,7 @@ def test_graph_never_exceeds_two_rewrites_and_still_finishes():
         grade_fn=lambda question, chunks: [ChunkGrade(chunk_id=c.chunk_id, relevant=False, reason="") for c in chunks],
         rewrite_fn=lambda question: question + "!",
         generate_fn=lambda question, chunks, failure_reason=None: "best effort",
-        check_fn=lambda answer, chunks: (True, "fully supported"),
+        check_fn=lambda answer, chunks: (True, "fully supported", []),
     )
 
     assert result.rewrite_count == 2
@@ -97,8 +132,8 @@ def test_graph_regenerates_once_then_succeeds():
     def fake_check(answer, chunks):
         check_calls["count"] += 1
         if check_calls["count"] == 1:
-            return False, "claimed a fact not in the sources"
-        return True, "fully supported"
+            return False, "claimed a fact not in the sources", ["claimed a fact not in the sources"]
+        return True, "fully supported", []
 
     state = GraphState(question="what is the policy", tenant_id="t1")
 
@@ -126,7 +161,7 @@ def test_graph_never_regenerates_twice_and_finishes_low_confidence():
         search_fn=lambda tenant_id, query, k=6: [_chunk("c1"), _chunk("c2")],
         grade_fn=lambda question, chunks: [ChunkGrade(chunk_id=c.chunk_id, relevant=True, reason="") for c in chunks],
         generate_fn=lambda question, chunks, failure_reason=None: "an answer",
-        check_fn=lambda answer, chunks: (False, "never grounded"),
+        check_fn=lambda answer, chunks: (False, "never grounded", ["never grounded"]),
     )
 
     assert result.regenerated is True
@@ -164,7 +199,7 @@ def test_build_graph_correction_enabled_defaults_to_true_and_is_unchanged():
         search_fn=lambda tenant_id, query, k=6: [_chunk("c1"), _chunk("c2")],
         grade_fn=lambda question, chunks: [ChunkGrade(chunk_id=c.chunk_id, relevant=True, reason="") for c in chunks],
         generate_fn=lambda question, chunks, failure_reason=None: "the answer",
-        check_fn=lambda answer, chunks: (True, "fully supported"),
+        check_fn=lambda answer, chunks: (True, "fully supported", []),
     )
 
     assert [t.node for t in result.trace] == ["retrieve", "grade", "generate", "groundedness_check"]
@@ -179,7 +214,7 @@ def test_graph_terminates_in_worst_case_of_both_hard_limits():
         grade_fn=lambda question, chunks: [ChunkGrade(chunk_id=c.chunk_id, relevant=False, reason="") for c in chunks],
         rewrite_fn=lambda question: question + "!",
         generate_fn=lambda question, chunks, failure_reason=None: "best effort",
-        check_fn=lambda answer, chunks: (False, "never grounded"),
+        check_fn=lambda answer, chunks: (False, "never grounded", ["never grounded"]),
     )
 
     assert result.rewrite_count == 2

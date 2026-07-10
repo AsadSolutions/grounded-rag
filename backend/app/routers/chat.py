@@ -36,7 +36,7 @@ async def _event_stream(request: ChatRequest) -> AsyncIterator[dict]:
             "low_confidence": result.low_confidence,
             "rewrite_count": result.rewrite_count,
             "regenerated": result.regenerated,
-            "entries": [entry.model_dump() for entry in result.trace],
+            "entries": [entry.model_dump(exclude_none=True) for entry in result.trace],
         }
         yield {"event": "trace", "data": json.dumps(trace_payload)}
     except Exception as exc:

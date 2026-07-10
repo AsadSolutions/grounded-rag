@@ -47,7 +47,7 @@ def test_chat_streams_tokens_then_sources_then_trace(monkeypatch):
     _wire_fake_graph(
         monkeypatch,
         generate_fn=lambda question, chunks, failure_reason=None: "paid time off accrues monthly",
-        check_fn=lambda answer, chunks: (True, "fully supported"),
+        check_fn=lambda answer, chunks: (True, "fully supported", []),
     )
     api = TestClient(app)
 
@@ -66,7 +66,7 @@ def test_chat_token_events_reconstruct_the_full_answer(monkeypatch):
     _wire_fake_graph(
         monkeypatch,
         generate_fn=lambda question, chunks, failure_reason=None: "hello there world",
-        check_fn=lambda answer, chunks: (True, "fully supported"),
+        check_fn=lambda answer, chunks: (True, "fully supported", []),
     )
     api = TestClient(app)
 
@@ -88,7 +88,7 @@ def test_chat_sources_event_contains_only_cited_chunks(monkeypatch):
             ChunkGrade(chunk_id="c3", relevant=True, reason=""),
         ],
         generate_fn=lambda question, chunks, failure_reason=None: "answer",
-        check_fn=lambda answer, chunks: (True, "fully supported"),
+        check_fn=lambda answer, chunks: (True, "fully supported", []),
     )
     monkeypatch.setattr(chat_router, "_graph", graph)
     api = TestClient(app)
@@ -106,7 +106,7 @@ def test_chat_trace_event_reports_low_confidence_flag(monkeypatch):
     _wire_fake_graph(
         monkeypatch,
         generate_fn=lambda question, chunks, failure_reason=None: "answer",
-        check_fn=lambda answer, chunks: (False, "never grounded"),
+        check_fn=lambda answer, chunks: (False, "never grounded", ["never grounded"]),
     )
     api = TestClient(app)
 
@@ -124,7 +124,7 @@ def test_chat_trace_event_reports_rewrite_count_and_regenerated(monkeypatch):
     _wire_fake_graph(
         monkeypatch,
         generate_fn=lambda question, chunks, failure_reason=None: "answer",
-        check_fn=lambda answer, chunks: (True, "fully supported"),
+        check_fn=lambda answer, chunks: (True, "fully supported", []),
         grade_fn=lambda question, chunks: [
             ChunkGrade(chunk_id=c.chunk_id, relevant=False, reason="") for c in chunks
         ],
@@ -141,6 +141,35 @@ def test_chat_trace_event_reports_rewrite_count_and_regenerated(monkeypatch):
     assert trace_payload["regenerated"] is False
 
 
+def test_chat_trace_entries_carry_structured_fields_and_omit_unused_ones(monkeypatch):
+    _wire_fake_graph(
+        monkeypatch,
+        generate_fn=lambda question, chunks, failure_reason=None: "answer",
+        check_fn=lambda answer, chunks: (True, "fully supported", []),
+    )
+    api = TestClient(app)
+
+    response = api.post("/api/chat", json={"tenant_id": "t1", "question": "q"})
+
+    import json
+
+    events = _parse_sse(response.text)
+    trace_payload = json.loads(next(e["data"] for e in events if e["event"] == "trace"))
+    entries_by_node = {entry["node"]: entry for entry in trace_payload["entries"]}
+
+    retrieve_entry = entries_by_node["retrieve"]
+    assert retrieve_entry["chunk_ids"] == ["c1", "c2"]
+    assert "grades" not in retrieve_entry
+
+    grade_entry = entries_by_node["grade"]
+    assert [g["chunk_id"] for g in grade_entry["grades"]] == ["c1", "c2"]
+    assert "chunk_ids" not in grade_entry
+
+    groundedness_entry = entries_by_node["groundedness_check"]
+    assert groundedness_entry["grounded"] is True
+    assert groundedness_entry["unsupported_claims"] == []
+
+
 def test_chat_emits_error_event_instead_of_dying_silently(monkeypatch):
     def _boom(question, chunks, failure_reason=None):
         raise RuntimeError("openai is down")
@@ -148,7 +177,7 @@ def test_chat_emits_error_event_instead_of_dying_silently(monkeypatch):
     _wire_fake_graph(
         monkeypatch,
         generate_fn=_boom,
-        check_fn=lambda answer, chunks: (True, "fully supported"),
+        check_fn=lambda answer, chunks: (True, "fully supported", []),
     )
     api = TestClient(app)
 
@@ -165,7 +194,7 @@ def test_chat_rejects_missing_question(monkeypatch):
     _wire_fake_graph(
         monkeypatch,
         generate_fn=lambda question, chunks, failure_reason=None: "answer",
-        check_fn=lambda answer, chunks: (True, "fully supported"),
+        check_fn=lambda answer, chunks: (True, "fully supported", []),
     )
     api = TestClient(app)
 

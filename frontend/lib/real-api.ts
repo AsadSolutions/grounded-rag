@@ -107,16 +107,78 @@ function toChunk(raw: ChunkResponse): RetrievedChunk {
   };
 }
 
-// The live graph's trace is a flat log — each node appends one
-// {node, message} entry (see backend/app/graph/nodes.py) — not the
-// step-typed, data-carrying union the mocks use to drive a richer replay
-// UI. There is no per-step query/chunks/grades/verdict to recover from a
-// free-text message, so real entries map onto a "log" line instead of
-// being reconstructed into the richer mock-only step shapes.
-type TraceEntryResponse = { node: string; message: string };
+// Each node now widens its {node, message} entry with the structured data
+// it already computes (see backend/app/graph/nodes.py). Fields are only
+// present for the node that produced them — exclude_none on the backend
+// keeps unrelated keys off the wire — so every access below is optional.
+// retrieve has no full per-attempt chunk metadata (only ids), so it can't
+// satisfy the mock's rich "retrieve" variant (which wants RetrievedChunk[]
+// with docName/chunkIndex); it falls back to "log", same as anything
+// unrecognized. rewrite/generate "attempt" numbers aren't sent — they're
+// derived here by counting prior entries of the same node, which is exact
+// since rewrite is capped at 2 attempts and generate at 1 regeneration.
+type ChunkGradeResponse = { chunk_id: string; relevant: boolean; reason?: string };
+type TraceEntryResponse = {
+  node: string;
+  message: string;
+  query?: string;
+  chunk_ids?: string[];
+  grades?: ChunkGradeResponse[];
+  old_query?: string;
+  new_query?: string;
+  is_regeneration?: boolean;
+  grounded?: boolean;
+  unsupported_claims?: string[];
+};
 
-function toTraceEntry(raw: TraceEntryResponse): TraceEntry {
-  return { step: "log", node: raw.node, message: raw.message };
+function makeTraceEntryMapper(): (raw: TraceEntryResponse) => TraceEntry {
+  let rewriteAttempts = 0;
+  let generateAttempts = 0;
+
+  return (raw: TraceEntryResponse): TraceEntry => {
+    switch (raw.node) {
+      case "grade":
+        if (raw.grades) {
+          return {
+            step: "grade",
+            grades: raw.grades.map((g) => ({
+              chunkId: g.chunk_id,
+              relevant: g.relevant,
+              reason: g.reason,
+            })),
+          };
+        }
+        break;
+      case "rewrite":
+        if (raw.old_query !== undefined && raw.new_query !== undefined) {
+          rewriteAttempts += 1;
+          return {
+            step: "rewrite",
+            attempt: rewriteAttempts,
+            originalQuery: raw.old_query,
+            rewrittenQuery: raw.new_query,
+          };
+        }
+        break;
+      case "generate":
+        if (raw.is_regeneration !== undefined) {
+          generateAttempts += 1;
+          return { step: "generate", attempt: generateAttempts };
+        }
+        break;
+      case "groundedness_check":
+        if (raw.grounded !== undefined) {
+          const claims = raw.unsupported_claims ?? [];
+          return {
+            step: "groundedness_check",
+            verdict: raw.grounded ? "grounded" : "not_grounded",
+            reason: claims.length > 0 ? claims.join("; ") : undefined,
+          };
+        }
+        break;
+    }
+    return { step: "log", node: raw.node, message: raw.message };
+  };
 }
 
 type EvalMetricResponse = {
@@ -248,13 +310,12 @@ function parseSseFrame(rawFrame: string): ChatEvent | null {
         chunks: (payload as ChunkResponse[]).map(toChunk),
       };
     // trace event data is {low_confidence, rewrite_count, regenerated,
-    // entries: [{node, message}, ...]} — a flat log, not a "steps" array
-    // of rich, per-node-type objects.
+    // entries: [{node, message, ...structured fields}, ...]}.
     case "trace":
       return {
         type: "trace",
         trace: {
-          steps: (payload.entries as TraceEntryResponse[]).map(toTraceEntry),
+          steps: (payload.entries as TraceEntryResponse[]).map(makeTraceEntryMapper()),
           rewriteCount: payload.rewrite_count,
           regenerated: payload.regenerated,
           lowConfidence: payload.low_confidence,
