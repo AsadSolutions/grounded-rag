@@ -53,6 +53,7 @@ export function ChatPanel({ tenantId }: { tenantId: string }) {
               rewriteCount: 0,
               regenerated: false,
               lowConfidence: true,
+              skippedPipeline: true,
             },
             error: stream.error ?? "Unknown streaming error.",
           }
@@ -66,6 +67,7 @@ export function ChatPanel({ tenantId }: { tenantId: string }) {
               rewriteCount: 0,
               regenerated: false,
               lowConfidence: true,
+              skippedPipeline: true,
             },
           };
 
@@ -132,13 +134,15 @@ export function ChatPanel({ tenantId }: { tenantId: string }) {
                         content={message.content}
                         streaming={false}
                       />
-                      <AnswerFooter
-                        sourceCount={message.sources.length}
-                        onShowReasoning={() => {
-                          setDrawerTrace(message.trace);
-                          setDrawerOpen(true);
-                        }}
-                      />
+                      {!message.trace.skippedPipeline && (
+                        <AnswerFooter
+                          sourceCount={message.sources.length}
+                          onShowReasoning={() => {
+                            setDrawerTrace(message.trace);
+                            setDrawerOpen(true);
+                          }}
+                        />
+                      )}
                     </>
                   )}
                 </div>
@@ -150,7 +154,11 @@ export function ChatPanel({ tenantId }: { tenantId: string }) {
               {stream.error ? (
                 <Badge variant="danger">{stream.error}</Badge>
               ) : (
-                <AssistantMessage content={stream.answer} streaming />
+                <AssistantMessage
+                  content={stream.answer}
+                  streaming
+                  stage={stream.stage}
+                />
               )}
             </div>
           )}

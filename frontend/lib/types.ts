@@ -58,10 +58,12 @@ export type ChatTrace = {
   rewriteCount: number;
   regenerated: boolean;
   lowConfidence: boolean;
+  skippedPipeline: boolean;
 };
 
 export type ChatEvent =
   | { type: "token"; value: string }
+  | { type: "stage"; label: string }
   | { type: "sources"; chunks: RetrievedChunk[] }
   | { type: "trace"; trace: ChatTrace }
   | { type: "error"; message: string };

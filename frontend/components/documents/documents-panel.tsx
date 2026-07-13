@@ -20,7 +20,8 @@ export function DocumentsPanel({
 }) {
   const { activeThread } = useChatThreads();
   const toast = useToast();
-  const [items, setItems] = useState(documents);
+  const [deletedIds, setDeletedIds] = useState<Set<string>>(new Set());
+  const items = documents.filter((d) => !deletedIds.has(d.id));
   const [pendingDelete, setPendingDelete] = useState<Document | null>(null);
   const [collapsed, setCollapsed] = useState(true);
   const [mounted, setMounted] = useState(false);
@@ -46,7 +47,7 @@ export function DocumentsPanel({
     const { id, name } = pendingDelete;
     try {
       await deleteDocument(tenantId, id);
-      setItems((prev) => prev.filter((d) => d.id !== id));
+      setDeletedIds((prev) => new Set(prev).add(id));
       setPendingDelete(null);
       toast.success(`Deleted "${name}"`);
     } catch (error) {
@@ -101,7 +102,9 @@ export function DocumentsPanel({
               }`}
             >
               <div className="flex items-start justify-between gap-2">
-                <p className="text-sm font-medium text-text">{doc.name}</p>
+                <p className="min-w-0 flex-1 break-words text-sm font-medium text-text">
+                  {doc.name}
+                </p>
                 {!isDemo && (
                   <button
                     onClick={() => setPendingDelete(doc)}

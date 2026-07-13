@@ -1,4 +1,4 @@
-import { DEMO_CHUNKS } from "./fixtures";
+import { DEMO_CHUNKS, DEMO_DOCUMENTS } from "./fixtures";
 import type { ChatEvent, RetrievedChunk, TraceEntry } from "@/lib/types";
 
 const TOKEN_DELAY_MIN_MS = 20;
@@ -54,6 +54,34 @@ const includesAny = (question: string, needles: string[]) => {
   const q = question.toLowerCase();
   return needles.some((needle) => q.includes(needle));
 };
+
+const GREETING_PATTERN =
+  /^(hi|hello|hey|hiya|yo)([,!]?\s*(there|team))?[!.]*$|^good (morning|afternoon|evening)[!.]*$|^(hi|hello|hey)[,!]?\s*how are you\??$/i;
+const GRATITUDE_PATTERN = /^(thanks|thank you|thx|cheers)(\s+(a lot|so much))?[!.]*$/i;
+const CAPABILITY_PATTERN = /^(what can you do|who are you|what are you)\??$/i;
+const DOCUMENT_META_PATTERN =
+  /(how many documents?(\s+(do you have|are there|have you got))?|what documents? do you have|which documents? do you have|list (your|the|all) documents?|documents? do you have)\??$/i;
+
+function mockSmalltalkReply(question: string): string {
+  const normalized = question.trim();
+  if (GRATITUDE_PATTERN.test(normalized)) {
+    return "You're welcome! Let me know if you have more questions about your documents.";
+  }
+  if (CAPABILITY_PATTERN.test(normalized)) {
+    return "I answer questions using the documents uploaded to this workspace. Ask me anything about their content, or upload more to get started.";
+  }
+  return "Hi! How can I help you with your documents today?";
+}
+
+function mockDocumentMetaReply(tenantId: string): string {
+  const documents = DEMO_DOCUMENTS[tenantId] ?? [];
+  if (documents.length === 0) {
+    return "You don't have any documents uploaded yet. Upload a PDF, TXT, or MD file to get started.";
+  }
+  const plural = documents.length === 1 ? "document" : "documents";
+  const names = documents.map((doc) => `- ${doc.name}`).join("\n");
+  return `You have ${documents.length} ${plural}:\n${names}`;
+}
 
 const SCENARIOS: Record<string, Scenario[]> = {
   "acme-legal": [
@@ -207,6 +235,33 @@ export async function* mockChat(
     return;
   }
 
+  const normalized = question.trim();
+  const isDocumentMeta = DOCUMENT_META_PATTERN.test(normalized);
+  const isSmalltalk =
+    !isDocumentMeta &&
+    (GREETING_PATTERN.test(normalized) ||
+      GRATITUDE_PATTERN.test(normalized) ||
+      CAPABILITY_PATTERN.test(normalized));
+
+  if (isDocumentMeta || isSmalltalk) {
+    const answer = isDocumentMeta
+      ? mockDocumentMetaReply(tenantId)
+      : mockSmalltalkReply(normalized);
+    yield* streamTokens(answer, signal);
+    yield { type: "sources", chunks: [] };
+    yield {
+      type: "trace",
+      trace: {
+        steps: [],
+        rewriteCount: 0,
+        regenerated: false,
+        lowConfidence: false,
+        skippedPipeline: true,
+      },
+    };
+    return;
+  }
+
   const scenario =
     (SCENARIOS[tenantId] ?? []).find((s) => s.match(question)) ??
     genericScenario(tenantId, question);
@@ -220,6 +275,7 @@ export async function* mockChat(
       rewriteCount: scenario.rewriteCount,
       regenerated: scenario.regenerated,
       lowConfidence: scenario.lowConfidence,
+      skippedPipeline: false,
     },
   };
 }

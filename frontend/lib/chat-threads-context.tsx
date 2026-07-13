@@ -11,12 +11,15 @@ import {
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import {
   deleteThread as deleteThreadStorage,
+  getLastActiveThreadId,
   listThreads,
   renameThread as renameThreadStorage,
   saveThread,
+  setLastActiveThreadId,
   type ChatMessage,
   type ChatThread,
 } from "@/lib/threads";
+import { setLastVisitedTenantId } from "@/lib/tenant";
 
 const CHAT_QUERY_PARAM = "chat";
 
@@ -52,18 +55,6 @@ export function ChatThreadsProvider({
   const [activeThreadId, setActiveThreadId] = useState<string | null>(null);
   const [isStreamingActive, setIsStreamingActive] = useState(false);
 
-  useEffect(() => {
-    const loaded = listThreads(tenantId);
-    setThreads(loaded);
-    const urlThreadId = searchParams.get(CHAT_QUERY_PARAM);
-    setActiveThreadId(
-      urlThreadId && loaded.some((t) => t.id === urlThreadId)
-        ? urlThreadId
-        : null,
-    );
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [tenantId]);
-
   const syncUrl = useCallback(
     (threadId: string | null) => {
       const params = new URLSearchParams(searchParams.toString());
@@ -77,12 +68,44 @@ export function ChatThreadsProvider({
     [pathname, router, searchParams],
   );
 
+  const onChatRoute = pathname?.startsWith("/chat/") ?? false;
+
+  useEffect(() => {
+    const loaded = listThreads(tenantId);
+    setThreads(loaded);
+
+    if (!onChatRoute) {
+      setActiveThreadId(null);
+      return;
+    }
+    const urlThreadId = searchParams.get(CHAT_QUERY_PARAM);
+    const fallbackThreadId = urlThreadId ?? getLastActiveThreadId(tenantId);
+    const resolvedThreadId =
+      fallbackThreadId && loaded.some((t) => t.id === fallbackThreadId)
+        ? fallbackThreadId
+        : null;
+    setActiveThreadId(resolvedThreadId);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tenantId, onChatRoute]);
+
+  useEffect(() => {
+    if (onChatRoute) {
+      setLastVisitedTenantId(tenantId);
+    }
+  }, [tenantId, onChatRoute]);
+
   const selectThread = useCallback(
     (threadId: string | null) => {
+      setLastActiveThreadId(tenantId, threadId);
+      if (!onChatRoute) {
+        const query = threadId ? `?${CHAT_QUERY_PARAM}=${threadId}` : "";
+        router.push(`/chat/${tenantId}${query}`);
+        return;
+      }
       setActiveThreadId(threadId);
       syncUrl(threadId);
     },
-    [syncUrl],
+    [syncUrl, tenantId, onChatRoute, router],
   );
 
   const startThread = useCallback(
@@ -104,6 +127,7 @@ export function ChatThreadsProvider({
       setThreads((prev) => [thread, ...prev]);
       setActiveThreadId(thread.id);
       syncUrl(thread.id);
+      setLastActiveThreadId(tenantId, thread.id);
       return thread;
     },
     [tenantId, syncUrl],
@@ -151,6 +175,7 @@ export function ChatThreadsProvider({
       setActiveThreadId((current) => {
         if (current !== threadId) return current;
         syncUrl(null);
+        setLastActiveThreadId(tenantId, null);
         return null;
       });
     },

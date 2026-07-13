@@ -24,6 +24,25 @@ function storageKey(tenantId: string): string {
   return `groundedrag-threads-${tenantId}`;
 }
 
+function lastActiveThreadKey(tenantId: string): string {
+  return `groundedrag-last-thread-${tenantId}`;
+}
+
+export function getLastActiveThreadId(tenantId: string): string | null {
+  return window.localStorage.getItem(lastActiveThreadKey(tenantId));
+}
+
+export function setLastActiveThreadId(
+  tenantId: string,
+  threadId: string | null,
+): void {
+  if (threadId) {
+    window.localStorage.setItem(lastActiveThreadKey(tenantId), threadId);
+  } else {
+    window.localStorage.removeItem(lastActiveThreadKey(tenantId));
+  }
+}
+
 export function listThreads(tenantId: string): ChatThread[] {
   const raw = window.localStorage.getItem(storageKey(tenantId));
   if (!raw) return [];

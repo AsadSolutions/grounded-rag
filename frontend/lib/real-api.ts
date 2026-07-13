@@ -9,8 +9,7 @@ import type {
   TraceEntry,
 } from "@/lib/types";
 
-export const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
+export const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
 async function apiFetch(path: string, init?: RequestInit): Promise<Response> {
   const response = await fetch(`${API_BASE_URL}${path}`, init);
@@ -68,10 +67,6 @@ function toDocument(raw: DocumentResponse): Document {
   };
 }
 
-// POST /api/documents returns an IngestResult, not a DocumentSummary: it
-// carries doc_id/doc_name instead of id/name and has no uploaded_at at all
-// (the timestamp lives on the Qdrant chunk payloads written during ingest,
-// not on the response). The upload just happened, so "now" is accurate.
 type IngestResultResponse = {
   doc_id: string;
   doc_name: string;
@@ -107,17 +102,11 @@ function toChunk(raw: ChunkResponse): RetrievedChunk {
   };
 }
 
-// Each node now widens its {node, message} entry with the structured data
-// it already computes (see backend/app/graph/nodes.py). Fields are only
-// present for the node that produced them — exclude_none on the backend
-// keeps unrelated keys off the wire — so every access below is optional.
-// retrieve has no full per-attempt chunk metadata (only ids), so it can't
-// satisfy the mock's rich "retrieve" variant (which wants RetrievedChunk[]
-// with docName/chunkIndex); it falls back to "log", same as anything
-// unrecognized. rewrite/generate "attempt" numbers aren't sent — they're
-// derived here by counting prior entries of the same node, which is exact
-// since rewrite is capped at 2 attempts and generate at 1 regeneration.
-type ChunkGradeResponse = { chunk_id: string; relevant: boolean; reason?: string };
+type ChunkGradeResponse = {
+  chunk_id: string;
+  relevant: boolean;
+  reason?: string;
+};
 type TraceEntryResponse = {
   node: string;
   message: string;
@@ -281,8 +270,6 @@ function parseSseFrame(rawFrame: string): ChatEvent | null {
   let eventName: string | null = null;
   const dataLines: string[] = [];
   for (const line of rawFrame.split("\n")) {
-    // SSE comment line — sse-starlette sends ": ping - <timestamp>" to
-    // keep the connection alive. Not a real event.
     if (line.startsWith(":")) continue;
     if (line.startsWith("event:")) {
       eventName = line.slice("event:".length).trim();
@@ -299,26 +286,28 @@ function parseSseFrame(rawFrame: string): ChatEvent | null {
   const payload = raw ? JSON.parse(raw) : {};
 
   switch (eventName) {
-    // token event data is {"token": "..."} — the field is "token", not "value".
     case "token":
       return { type: "token", value: payload.token };
-    // sources event data is a bare JSON array of chunk dicts, not
-    // {"chunks": [...]}.
+
+    case "stage":
+      return { type: "stage", label: payload.label };
     case "sources":
       return {
         type: "sources",
         chunks: (payload as ChunkResponse[]).map(toChunk),
       };
-    // trace event data is {low_confidence, rewrite_count, regenerated,
-    // entries: [{node, message, ...structured fields}, ...]}.
+
     case "trace":
       return {
         type: "trace",
         trace: {
-          steps: (payload.entries as TraceEntryResponse[]).map(makeTraceEntryMapper()),
+          steps: (payload.entries as TraceEntryResponse[]).map(
+            makeTraceEntryMapper(),
+          ),
           rewriteCount: payload.rewrite_count,
           regenerated: payload.regenerated,
           lowConfidence: payload.low_confidence,
+          skippedPipeline: payload.skipped_pipeline,
         },
       };
     case "error":
@@ -355,10 +344,7 @@ async function* chat(
     while (true) {
       const { done, value } = await reader.read();
       if (done) break;
-      // sse-starlette terminates every line with CRLF, so frames are
-      // separated by "\r\n\r\n", not a bare "\n\n" — normalize before
-      // splitting or frame boundaries are never found and the stream
-      // silently yields nothing.
+
       buffer += decoder.decode(value, { stream: true }).replace(/\r\n/g, "\n");
 
       let boundary = buffer.indexOf("\n\n");

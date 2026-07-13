@@ -9,6 +9,7 @@ export type ChatStreamStatus = "idle" | "streaming" | "done" | "error";
 export type ChatStreamResult = {
   status: ChatStreamStatus;
   answer: string;
+  stage: string | null;
   sources: RetrievedChunk[];
   trace: ChatTrace | null;
   error: string | null;
@@ -23,6 +24,7 @@ export type ChatStreamResult = {
 export function useChatStream(): ChatStreamResult {
   const [status, setStatus] = useState<ChatStreamStatus>("idle");
   const [answer, setAnswer] = useState("");
+  const [stage, setStage] = useState<string | null>(null);
   const [sources, setSources] = useState<RetrievedChunk[]>([]);
   const [trace, setTrace] = useState<ChatTrace | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -40,6 +42,7 @@ export function useChatStream(): ChatStreamResult {
 
       setStatus("streaming");
       setAnswer("");
+      setStage(null);
       setSources([]);
       setTrace(null);
       setError(null);
@@ -55,8 +58,12 @@ export function useChatStream(): ChatStreamResult {
             controller.signal,
           )) {
             switch (event.type) {
+              case "stage":
+                setStage(event.label);
+                break;
               case "token":
                 buffer += event.value;
+                setStage(null);
                 if (!buffered) setAnswer(buffer);
                 break;
               case "sources":
@@ -90,5 +97,5 @@ export function useChatStream(): ChatStreamResult {
     [],
   );
 
-  return { status, answer, sources, trace, error, start, stop };
+  return { status, answer, stage, sources, trace, error, start, stop };
 }

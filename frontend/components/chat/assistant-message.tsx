@@ -1,10 +1,20 @@
 export function AssistantMessage({
   content,
   streaming,
+  stage,
 }: {
   content: string;
   streaming: boolean;
+  stage?: string | null;
 }) {
+  if (streaming && content === "" && stage) {
+    return (
+      <p className="animate-pulse text-caption text-muted" aria-live="polite">
+        {stage}…
+      </p>
+    );
+  }
+
   return (
     <p className="whitespace-pre-wrap text-body leading-reading text-text">
       {content}

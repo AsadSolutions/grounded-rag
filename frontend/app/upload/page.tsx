@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Input } from "@/components/ui/input";
 import { DropWell } from "@/components/upload/drop-well";
@@ -8,8 +8,10 @@ import {
   UploadFileRow,
   type UploadItem,
 } from "@/components/upload/upload-file-row";
-import { createTenant, uploadDocument } from "@/lib/api";
+import { DocumentsPanel } from "@/components/documents/documents-panel";
+import { createTenant, listDocuments, uploadDocument } from "@/lib/api";
 import { useScratchTenant } from "@/lib/scratch-tenant-context";
+import type { Document } from "@/lib/types";
 
 const REDIRECT_DELAY_MS = 600;
 
@@ -18,10 +20,16 @@ export default function UploadPage() {
   const { scratchTenantId, setScratchTenant } = useScratchTenant();
   const [workspaceName, setWorkspaceName] = useState("My workspace");
   const [items, setItems] = useState<UploadItem[]>([]);
+  const [documents, setDocuments] = useState<Document[]>([]);
   const itemsRef = useRef<UploadItem[]>([]);
   const creatingTenant = useRef<Promise<string> | null>(null);
   const redirected = useRef(false);
   const hasStarted = items.length > 0;
+
+  useEffect(() => {
+    if (!scratchTenantId) return;
+    listDocuments(scratchTenantId).then(setDocuments);
+  }, [scratchTenantId]);
 
   function updateItems(updater: (prev: UploadItem[]) => UploadItem[]) {
     setItems((prev) => {
@@ -67,7 +75,7 @@ export default function UploadPage() {
     await Promise.all(
       newItems.map(async (item) => {
         try {
-          await uploadDocument(tenantId, item.file, (pct) => {
+          const document = await uploadDocument(tenantId, item.file, (pct) => {
             updateItems((prev) =>
               prev.map((i) =>
                 i.id === item.id ? { ...i, progress: pct } : i,
@@ -79,6 +87,7 @@ export default function UploadPage() {
               i.id === item.id ? { ...i, status: "done", progress: 100 } : i,
             ),
           );
+          setDocuments((prev) => [...prev, document]);
         } catch (error) {
           updateItems((prev) =>
             prev.map((i) =>
@@ -102,45 +111,54 @@ export default function UploadPage() {
   }
 
   return (
-    <div className="mx-auto flex w-full max-w-content flex-1 flex-col gap-6 px-4 py-10 sm:px-6 sm:py-16">
-      <div className="flex flex-col gap-2">
-        <h1 className="font-serif text-title text-text">Upload documents</h1>
-        <p className="text-body leading-reading text-muted">
-          Add PDF, TXT, or MD files to ask questions about them.
-        </p>
-      </div>
-
-      {!scratchTenantId && (
-        <div className="flex max-w-upload-well flex-col gap-1.5">
-          <label
-            htmlFor="workspace-name"
-            className="text-caption font-medium text-text"
-          >
-            Workspace name <span className="text-muted">(optional)</span>
-          </label>
-          <Input
-            id="workspace-name"
-            value={workspaceName}
-            onChange={(e) => setWorkspaceName(e.target.value)}
-            placeholder="My workspace"
-            disabled={hasStarted}
-          />
+    <div className="flex flex-1 overflow-hidden">
+      <div className="mx-auto flex w-full max-w-content flex-1 flex-col gap-6 overflow-y-auto px-4 py-10 sm:px-6 sm:py-16">
+        <div className="flex flex-col gap-2">
+          <h1 className="font-serif text-title text-text">Upload documents</h1>
+          <p className="text-body leading-reading text-muted">
+            Add PDF, TXT, or MD files to ask questions about them.
+          </p>
         </div>
-      )}
 
-      <DropWell onFilesAccepted={handleFilesAccepted} />
+        {!scratchTenantId && (
+          <div className="flex max-w-upload-well flex-col gap-1.5">
+            <label
+              htmlFor="workspace-name"
+              className="text-caption font-medium text-text"
+            >
+              Workspace name <span className="text-muted">(optional)</span>
+            </label>
+            <Input
+              id="workspace-name"
+              value={workspaceName}
+              onChange={(e) => setWorkspaceName(e.target.value)}
+              placeholder="My workspace"
+              disabled={hasStarted}
+            />
+          </div>
+        )}
 
-      <p className="text-caption leading-reading text-muted">
-        Your workspace is temporary and expires 24 hours after creation.
-        Documents are processed and stored for retrieval.
-      </p>
+        <DropWell onFilesAccepted={handleFilesAccepted} />
 
-      {items.length > 0 && (
-        <ul className="flex flex-col gap-2">
-          {items.map((item) => (
-            <UploadFileRow key={item.id} item={item} />
-          ))}
-        </ul>
+        <p className="text-caption leading-reading text-muted">
+          Your workspace is temporary and expires 24 hours after creation.
+          Documents are processed and stored for retrieval.
+        </p>
+
+        {items.length > 0 && (
+          <ul className="flex flex-col gap-2">
+            {items.map((item) => (
+              <UploadFileRow key={item.id} item={item} />
+            ))}
+          </ul>
+        )}
+      </div>
+      {scratchTenantId && (
+        <DocumentsPanel
+          tenantId={scratchTenantId}
+          documents={documents}
+          isDemo={false}
+        />
       )}
     </div>
   );

@@ -44,9 +44,14 @@ def _wire_fake_graph(monkeypatch, *, generate_fn, check_fn, grade_fn=None, rewri
         check_fn=check_fn,
     )
     monkeypatch.setattr(chat_router, "_graph", graph)
+    # Placeholder test questions ("q", "hi") would otherwise fall through to
+    # classify_intent's real LLM fallback, since only smalltalk/document_meta
+    # have fast-path regexes. Force every graph-path test onto the graph
+    # deterministically, with no real OpenAI call.
+    monkeypatch.setattr(chat_router, "classify_intent", lambda question: "document_question")
 
 
-def test_chat_streams_tokens_then_sources_then_trace(monkeypatch):
+def test_chat_streams_stages_then_tokens_then_sources_then_trace(monkeypatch):
     _wire_fake_graph(
         monkeypatch,
         generate_fn=lambda question, chunks, failure_reason=None: "paid time off accrues monthly",
@@ -60,9 +65,56 @@ def test_chat_streams_tokens_then_sources_then_trace(monkeypatch):
     events = _parse_sse(response.text)
     kinds = [e["event"] for e in events]
 
+    # retrieve, grade, generate, groundedness_check — no rewrite, since the
+    # default grade_fn in _wire_fake_graph marks every chunk relevant.
+    assert kinds[:4] == ["stage", "stage", "stage", "stage"]
     assert kinds.count("token") == 5  # "paid time off accrues monthly" -> 5 words
     assert kinds[-2:] == ["sources", "trace"]
-    assert all(k == "token" for k in kinds[:-2])
+    assert all(k == "token" for k in kinds[4:-2])
+
+
+def test_chat_stage_events_report_human_readable_node_labels(monkeypatch):
+    _wire_fake_graph(
+        monkeypatch,
+        generate_fn=lambda question, chunks, failure_reason=None: "answer",
+        check_fn=lambda answer, chunks: (True, "fully supported", []),
+    )
+    api = TestClient(app)
+
+    response = api.post("/api/chat", json={"tenant_id": "t1", "question": "q"})
+
+    import json
+
+    events = _parse_sse(response.text)
+    labels = [json.loads(e["data"])["label"] for e in events if e["event"] == "stage"]
+
+    assert labels == [
+        "Searching documents",
+        "Checking relevance",
+        "Writing answer",
+        "Verifying answer",
+    ]
+
+
+def test_chat_stage_events_include_refining_search_on_rewrite(monkeypatch):
+    _wire_fake_graph(
+        monkeypatch,
+        generate_fn=lambda question, chunks, failure_reason=None: "answer",
+        check_fn=lambda answer, chunks: (True, "fully supported", []),
+        grade_fn=lambda question, chunks: [
+            ChunkGrade(chunk_id=c.chunk_id, relevant=False, reason="") for c in chunks
+        ],
+    )
+    api = TestClient(app)
+
+    response = api.post("/api/chat", json={"tenant_id": "t1", "question": "q"})
+
+    import json
+
+    events = _parse_sse(response.text)
+    labels = [json.loads(e["data"])["label"] for e in events if e["event"] == "stage"]
+
+    assert labels.count("Refining search") == 2  # MAX_REWRITES
 
 
 def test_chat_token_events_reconstruct_the_full_answer(monkeypatch):
@@ -94,6 +146,7 @@ def test_chat_sources_event_contains_only_cited_chunks(monkeypatch):
         check_fn=lambda answer, chunks: (True, "fully supported", []),
     )
     monkeypatch.setattr(chat_router, "_graph", graph)
+    monkeypatch.setattr(chat_router, "classify_intent", lambda question: "document_question")
     api = TestClient(app)
 
     response = api.post("/api/chat", json={"tenant_id": "t1", "question": "q"})
@@ -190,8 +243,14 @@ def test_chat_emits_error_event_instead_of_dying_silently(monkeypatch, caplog):
     import json
 
     events = _parse_sse(response.text)
-    assert [e["event"] for e in events] == ["error"]
-    message = json.loads(events[0]["data"])["message"]
+    kinds = [e["event"] for e in events]
+    # retrieve and grade complete (and emit their stage events) before
+    # generate raises — the failure still ends the stream with a single
+    # error event, just after whatever real progress happened first.
+    assert kinds[-1] == "error"
+    assert all(k == "stage" for k in kinds[:-1])
+
+    message = json.loads(events[-1]["data"])["message"]
     # Clean to the client: no internal exception text leaks over the wire.
     assert "openai is down" not in message
     assert message == "Something went wrong answering your question. Please try again."
@@ -230,3 +289,77 @@ def test_chat_rejects_missing_question(monkeypatch):
     response = api.post("/api/chat", json={"tenant_id": "t1"})
 
     assert response.status_code == 422
+
+
+def test_chat_smalltalk_bypasses_the_graph_entirely(monkeypatch):
+    class _ExplodingGraph:
+        def invoke(self, *args, **kwargs):
+            raise RuntimeError("graph should not run for smalltalk")
+
+        def stream(self, *args, **kwargs):
+            raise RuntimeError("graph should not run for smalltalk")
+
+    monkeypatch.setattr(chat_router, "_graph", _ExplodingGraph())
+    api = TestClient(app)
+
+    response = api.post("/api/chat", json={"tenant_id": "t1", "question": "hello"})
+
+    assert response.status_code == 200
+    events = _parse_sse(response.text)
+    kinds = [e["event"] for e in events]
+    assert kinds[-2:] == ["sources", "trace"]
+    assert all(k == "token" for k in kinds[:-2])
+
+    import json
+
+    trace_payload = json.loads(next(e["data"] for e in events if e["event"] == "trace"))
+    assert trace_payload["skipped_pipeline"] is True
+    sources = json.loads(next(e["data"] for e in events if e["event"] == "sources"))
+    assert sources == []
+
+
+def test_chat_document_meta_bypasses_the_graph_and_lists_documents(monkeypatch):
+    class _ExplodingGraph:
+        def invoke(self, *args, **kwargs):
+            raise RuntimeError("graph should not run for document_meta")
+
+        def stream(self, *args, **kwargs):
+            raise RuntimeError("graph should not run for document_meta")
+
+    monkeypatch.setattr(chat_router, "_graph", _ExplodingGraph())
+    monkeypatch.setattr(
+        chat_router,
+        "answer_document_meta",
+        lambda tenant_id: "You have 2 documents:\n- a.txt\n- b.txt",
+    )
+    api = TestClient(app)
+
+    response = api.post(
+        "/api/chat", json={"tenant_id": "t1", "question": "how many documents do you have?"}
+    )
+
+    import json
+
+    events = _parse_sse(response.text)
+    tokens = [json.loads(e["data"])["token"] for e in events if e["event"] == "token"]
+    assert "".join(tokens) == "You have 2 documents:\n- a.txt\n- b.txt"
+    trace_payload = json.loads(next(e["data"] for e in events if e["event"] == "trace"))
+    assert trace_payload["skipped_pipeline"] is True
+
+
+def test_chat_regular_question_still_runs_the_graph_and_marks_skipped_pipeline_false(monkeypatch):
+    _wire_fake_graph(
+        monkeypatch,
+        generate_fn=lambda question, chunks, failure_reason=None: "paid time off accrues monthly",
+        check_fn=lambda answer, chunks: (True, "fully supported", []),
+    )
+    api = TestClient(app)
+
+    response = api.post("/api/chat", json={"tenant_id": "t1", "question": "what is the pto policy"})
+
+    import json
+
+    trace_payload = json.loads(
+        next(e["data"] for e in _parse_sse(response.text) if e["event"] == "trace")
+    )
+    assert trace_payload["skipped_pipeline"] is False
