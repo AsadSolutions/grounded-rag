@@ -37,7 +37,7 @@ export function ChatInput({
   }
 
   return (
-    <div className="flex w-full flex-col gap-2 rounded-card border border-border bg-surface px-4 py-3 shadow-[var(--shadow-card)] transition-colors duration-150 ease-out focus-within:border-muted">
+    <div className="flex w-full flex-col gap-2 rounded-card border border-border bg-surface px-4 py-3 shadow-card transition-colors duration-150 ease-out focus-within:border-muted">
       <textarea
         ref={textareaRef}
         rows={1}
@@ -46,7 +46,7 @@ export function ChatInput({
         onKeyDown={handleKeyDown}
         disabled={disabled}
         placeholder={placeholder}
-        className="max-h-[200px] w-full resize-none bg-transparent text-[15px] text-text placeholder:text-muted focus-visible:outline-none disabled:opacity-50"
+        className="max-h-chat-input-max w-full resize-none bg-transparent text-body text-text placeholder:text-muted focus-visible:outline-none disabled:opacity-50"
       />
       <div className="flex items-center justify-end">
         <button

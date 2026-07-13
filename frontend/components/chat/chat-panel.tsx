@@ -111,7 +111,7 @@ export function ChatPanel({ tenantId }: { tenantId: string }) {
         >
           {messages.length === 0 && !isStreamingActive ? (
             <div className="flex flex-1 flex-col items-center justify-center gap-4 py-24 text-center">
-              <p className="font-serif text-[20px] text-text">
+              <p className="font-serif text-xl text-text">
                 Ask your documents anything.
               </p>
             </div>

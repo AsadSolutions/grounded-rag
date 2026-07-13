@@ -6,7 +6,7 @@ export function AnswerFooter({
   onShowReasoning: () => void;
 }) {
   return (
-    <div className="mt-2 flex items-center gap-3 text-[13px] text-muted">
+    <div className="mt-2 flex items-center gap-3 text-caption text-muted">
       <span>
         {sourceCount} {sourceCount === 1 ? "source" : "sources"}
       </span>

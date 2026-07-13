@@ -50,7 +50,7 @@ export default async function Home() {
             priority
           />
         </div>
-        <p className="max-w-xl text-[15px] leading-[1.6] text-muted">
+        <p className="max-w-xl text-body leading-reading text-muted">
           GroundedRAG answers questions from your documents and shows its
           work. Every answer is checked against the sources before you see
           it, graded, verified, and cited, or honestly flagged when the
@@ -70,7 +70,7 @@ export default async function Home() {
         id="demo"
         className="mx-auto flex w-full max-w-content flex-col gap-6 px-6 py-16"
       >
-        <p className="text-[11px] font-medium uppercase tracking-[0.08em] text-muted">
+        <p className="text-eyebrow font-medium uppercase tracking-eyebrow text-muted">
           Try it on real documents
         </p>
         <div className="grid gap-4 sm:grid-cols-2">
@@ -84,11 +84,11 @@ export default async function Home() {
         <div className="grid gap-8 sm:grid-cols-3">
           {STEPS.map((step) => (
             <div key={step.number} className="flex flex-col gap-2">
-              <span className="font-serif text-[28px] text-accent">
+              <span className="font-serif text-title text-accent">
                 {step.number}
               </span>
-              <h3 className="font-serif text-[20px] text-text">{step.title}</h3>
-              <p className="text-[15px] leading-[1.6] text-muted">
+              <h3 className="font-serif text-xl text-text">{step.title}</h3>
+              <p className="text-body leading-reading text-muted">
                 {step.description}
               </p>
             </div>
@@ -96,13 +96,13 @@ export default async function Home() {
         </div>
         <Link
           href="/evals"
-          className="text-[13px] text-muted underline decoration-border underline-offset-4 transition-colors duration-150 ease-out hover:text-accent"
+          className="text-caption text-muted underline decoration-border underline-offset-4 transition-colors duration-150 ease-out hover:text-accent"
         >
           See the measured results
         </Link>
       </section>
 
-      <footer className="mt-auto flex flex-col items-center gap-3 border-t border-border px-6 py-8 text-[13px] text-muted sm:flex-row sm:justify-between">
+      <footer className="mt-auto flex flex-col items-center gap-3 border-t border-border px-6 py-8 text-caption text-muted sm:flex-row sm:justify-between">
         <a
           href="https://github.com/AsadSolutions/grounded-rag"
           className="flex items-center gap-2 transition-colors duration-150 ease-out hover:text-accent"

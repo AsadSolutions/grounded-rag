@@ -3,6 +3,8 @@ trace (CLAUDE.md rule 8 — SSE, never polling), with the compiled graph
 swapped for one built from fakes so no real OpenAI/Qdrant call happens.
 """
 
+import logging
+
 import app.routers.chat as chat_router
 from app.graph.build import build_graph
 from app.main import app
@@ -32,11 +34,12 @@ def _parse_sse(raw_text: str) -> list[dict]:
     return events
 
 
-def _wire_fake_graph(monkeypatch, *, generate_fn, check_fn, grade_fn=None):
+def _wire_fake_graph(monkeypatch, *, generate_fn, check_fn, grade_fn=None, rewrite_fn=None):
     graph = build_graph(
         search_fn=lambda tenant_id, query, k=6: [_chunk("c1"), _chunk("c2")],
         grade_fn=grade_fn
         or (lambda question, chunks: [ChunkGrade(chunk_id=c.chunk_id, relevant=True, reason="") for c in chunks]),
+        rewrite_fn=rewrite_fn or (lambda question: f"{question} (rewritten)"),
         generate_fn=generate_fn,
         check_fn=check_fn,
     )
@@ -170,7 +173,7 @@ def test_chat_trace_entries_carry_structured_fields_and_omit_unused_ones(monkeyp
     assert groundedness_entry["unsupported_claims"] == []
 
 
-def test_chat_emits_error_event_instead_of_dying_silently(monkeypatch):
+def test_chat_emits_error_event_instead_of_dying_silently(monkeypatch, caplog):
     def _boom(question, chunks, failure_reason=None):
         raise RuntimeError("openai is down")
 
@@ -181,13 +184,39 @@ def test_chat_emits_error_event_instead_of_dying_silently(monkeypatch):
     )
     api = TestClient(app)
 
-    response = api.post("/api/chat", json={"tenant_id": "t1", "question": "q"})
+    with caplog.at_level(logging.ERROR):
+        response = api.post("/api/chat", json={"tenant_id": "t1", "question": "q"})
 
     import json
 
     events = _parse_sse(response.text)
     assert [e["event"] for e in events] == ["error"]
-    assert "openai is down" in json.loads(events[0]["data"])["message"]
+    message = json.loads(events[0]["data"])["message"]
+    # Clean to the client: no internal exception text leaks over the wire.
+    assert "openai is down" not in message
+    assert message == "Something went wrong answering your question. Please try again."
+    # Loud on the server: the real cause is logged, not swallowed.
+    assert "openai is down" in caplog.text
+
+
+def test_chat_returns_429_after_exceeding_the_rate_limit(monkeypatch):
+    import app.routers.chat as chat_module
+    from app.rate_limit import RateLimiter
+
+    monkeypatch.setattr(chat_module, "_chat_rate_limiter", RateLimiter(max_requests=1, window_seconds=60))
+    _wire_fake_graph(
+        monkeypatch,
+        generate_fn=lambda question, chunks, failure_reason=None: "answer",
+        check_fn=lambda answer, chunks: (True, "fully supported", []),
+    )
+    api = TestClient(app)
+
+    first = api.post("/api/chat", json={"tenant_id": "t1", "question": "q"})
+    second = api.post("/api/chat", json={"tenant_id": "t1", "question": "q"})
+
+    assert first.status_code == 200
+    assert second.status_code == 429
+    assert "Retry-After" in second.headers
 
 
 def test_chat_rejects_missing_question(monkeypatch):

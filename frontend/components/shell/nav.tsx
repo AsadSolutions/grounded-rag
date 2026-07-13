@@ -16,7 +16,7 @@ export function Nav({ tenantId }: { tenantId: string | null }) {
       {tenantId ? (
         <Link
           href={`/chat/${tenantId}`}
-          className={`rounded-button px-2 py-1.5 text-[14px] font-medium transition-colors duration-150 ease-out ${
+          className={`rounded-button px-2 py-1.5 text-sm font-medium transition-colors duration-150 ease-out ${
             pathname?.startsWith("/chat")
               ? "bg-accent-soft text-accent"
               : "text-text hover:bg-surface-2"
@@ -25,7 +25,7 @@ export function Nav({ tenantId }: { tenantId: string | null }) {
           Chat
         </Link>
       ) : (
-        <span className="cursor-not-allowed rounded-button px-2 py-1.5 text-[14px] font-medium text-muted opacity-50">
+        <span className="cursor-not-allowed rounded-button px-2 py-1.5 text-sm font-medium text-muted opacity-50">
           Chat
         </span>
       )}
@@ -33,7 +33,7 @@ export function Nav({ tenantId }: { tenantId: string | null }) {
         <Link
           key={link.href}
           href={link.href}
-          className={`rounded-button px-2 py-1.5 text-[14px] font-medium transition-colors duration-150 ease-out ${
+          className={`rounded-button px-2 py-1.5 text-sm font-medium transition-colors duration-150 ease-out ${
             link.active
               ? "bg-accent-soft text-accent"
               : "text-text hover:bg-surface-2"

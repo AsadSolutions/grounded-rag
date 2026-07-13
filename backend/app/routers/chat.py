@@ -1,16 +1,33 @@
 import json
+import logging
 from collections.abc import AsyncIterator
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends, Request
 from sse_starlette.sse import EventSourceResponse
 from starlette.concurrency import run_in_threadpool
 
+from app.config import get_settings
 from app.graph.build import build_graph
 from app.models import ChatRequest, GraphState
+from app.rate_limit import RateLimiter
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
 _graph = build_graph()
+_chat_rate_limiter = RateLimiter(
+    max_requests=get_settings().chat_rate_limit_per_minute, window_seconds=60
+)
+
+
+def _check_chat_rate_limit(request: Request) -> None:
+    # Indirection (rather than `Depends(_chat_rate_limiter)` directly) so
+    # tests can monkeypatch the module-level `_chat_rate_limiter` name and
+    # have it take effect: FastAPI resolves a Depends() target once, at
+    # route-definition time, so binding the object itself as the default
+    # would freeze in the original instance forever.
+    _chat_rate_limiter(request)
 
 
 def _cited_chunks(state: GraphState) -> list:
@@ -39,10 +56,18 @@ async def _event_stream(request: ChatRequest) -> AsyncIterator[dict]:
             "entries": [entry.model_dump(exclude_none=True) for entry in result.trace],
         }
         yield {"event": "trace", "data": json.dumps(trace_payload)}
-    except Exception as exc:
-        yield {"event": "error", "data": json.dumps({"message": str(exc)})}
+    except Exception:
+        logger.exception("Chat pipeline failed for tenant_id=%s", request.tenant_id)
+        yield {
+            "event": "error",
+            "data": json.dumps(
+                {"message": "Something went wrong answering your question. Please try again."}
+            ),
+        }
 
 
 @router.post("/api/chat")
-async def chat(request: ChatRequest) -> EventSourceResponse:
+async def chat(
+    request: ChatRequest, _: None = Depends(_check_chat_rate_limit)
+) -> EventSourceResponse:
     return EventSourceResponse(_event_stream(request))

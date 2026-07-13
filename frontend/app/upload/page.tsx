@@ -102,19 +102,19 @@ export default function UploadPage() {
   }
 
   return (
-    <div className="mx-auto flex w-full max-w-content flex-1 flex-col gap-6 px-6 py-16">
+    <div className="mx-auto flex w-full max-w-content flex-1 flex-col gap-6 px-4 py-10 sm:px-6 sm:py-16">
       <div className="flex flex-col gap-2">
-        <h1 className="font-serif text-[28px] text-text">Upload documents</h1>
-        <p className="text-[15px] leading-[1.6] text-muted">
+        <h1 className="font-serif text-title text-text">Upload documents</h1>
+        <p className="text-body leading-reading text-muted">
           Add PDF, TXT, or MD files to ask questions about them.
         </p>
       </div>
 
       {!scratchTenantId && (
-        <div className="flex max-w-[360px] flex-col gap-1.5">
+        <div className="flex max-w-upload-well flex-col gap-1.5">
           <label
             htmlFor="workspace-name"
-            className="text-[13px] font-medium text-text"
+            className="text-caption font-medium text-text"
           >
             Workspace name <span className="text-muted">(optional)</span>
           </label>
@@ -130,7 +130,7 @@ export default function UploadPage() {
 
       <DropWell onFilesAccepted={handleFilesAccepted} />
 
-      <p className="text-[13px] leading-[1.6] text-muted">
+      <p className="text-caption leading-reading text-muted">
         Your workspace is temporary and expires 24 hours after creation.
         Documents are processed and stored for retrieval.
       </p>

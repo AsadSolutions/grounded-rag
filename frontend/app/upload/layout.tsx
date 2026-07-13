@@ -11,7 +11,7 @@ export default function UploadLayout({ children }: { children: ReactNode }) {
 
   const shell = (
     <div className="flex h-dvh flex-col md:flex-row">
-      <aside className="hidden h-full w-[260px] shrink-0 flex-col border-r border-border bg-bg md:flex">
+      <aside className="hidden h-full w-sidebar shrink-0 flex-col border-r border-border bg-bg md:flex">
         <AppSidebar tenantId={scratchTenantId} />
       </aside>
       <MobileSidebarSheet tenantId={scratchTenantId} />

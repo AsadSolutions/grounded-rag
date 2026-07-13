@@ -14,8 +14,8 @@ type DrawerProps = {
 };
 
 const sidePositionClasses: Record<DrawerSide, string> = {
-  right: "right-0 top-0 h-full w-[420px] max-w-[90vw] border-l",
-  left: "left-0 top-0 h-full w-[280px] max-w-[85vw] border-r",
+  right: "right-0 top-0 h-full w-drawer max-w-[90vw] border-l",
+  left: "left-0 top-0 h-full w-mobile-sheet max-w-[85vw] border-r",
   bottom: "bottom-0 left-0 w-full max-h-[85vh] border-t",
 };
 
@@ -26,9 +26,9 @@ const sideTransformClasses: Record<DrawerSide, { open: string; closed: string }>
 };
 
 const sideContentClasses: Record<DrawerSide, string> = {
-  right: "h-[calc(100%-61px)] overflow-y-auto p-5",
-  left: "h-[calc(100%-61px)] overflow-y-auto p-5",
-  bottom: "max-h-[calc(85vh-61px)] overflow-y-auto p-5",
+  right: "h-[calc(100%-var(--spacing-drawer-header))] overflow-y-auto p-5",
+  left: "h-[calc(100%-var(--spacing-drawer-header))] overflow-y-auto p-5",
+  bottom: "max-h-[calc(85vh-var(--spacing-drawer-header))] overflow-y-auto p-5",
 };
 
 export function Drawer({
@@ -64,7 +64,7 @@ export function Drawer({
         } ${open ? transform.open : transform.closed}`}
       >
         <div className="flex items-center justify-between border-b border-border px-5 py-4">
-          <h2 className="font-serif text-[18px] text-text">{title}</h2>
+          <h2 className="font-serif text-lg text-text">{title}</h2>
           <button
             onClick={onClose}
             aria-label="Close"

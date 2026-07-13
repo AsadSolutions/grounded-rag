@@ -55,6 +55,8 @@ class Settings:
     chat_model: str = "gpt-4o-mini"
     protected_tenant_ids: tuple[str, ...] = ("demo-acme-legal", "demo-techcorp")
     frontend_origin: str = "http://localhost:3000"
+    chat_rate_limit_per_minute: int = 20
+    upload_rate_limit_per_minute: int = 10
 
 
 @lru_cache
@@ -64,6 +66,12 @@ def get_settings() -> Settings:
         "openai_api_key": os.environ.get("OPENAI_API_KEY") or None,
         "qdrant_url": os.environ.get("QDRANT_URL", "http://localhost:6333"),
         "frontend_origin": os.environ.get("FRONTEND_ORIGIN", "http://localhost:3000"),
+        "chat_rate_limit_per_minute": int(
+            os.environ.get("CHAT_RATE_LIMIT_PER_MINUTE", "20")
+        ),
+        "upload_rate_limit_per_minute": int(
+            os.environ.get("UPLOAD_RATE_LIMIT_PER_MINUTE", "10")
+        ),
     }
     if protected_env is not None:
         settings_kwargs["protected_tenant_ids"] = tuple(

@@ -21,14 +21,14 @@ export function UploadFileRow({ item }: { item: UploadItem }) {
   return (
     <li className="flex flex-col gap-1.5 rounded-card border border-border bg-surface p-3">
       <div className="flex items-center justify-between gap-2">
-        <p className="truncate text-[14px] font-medium text-text">
+        <p className="truncate text-sm font-medium text-text">
           {item.file.name}
         </p>
         {item.status === "failed" && <Badge variant="danger">Failed</Badge>}
         {item.status === "done" && <Badge variant="ok">Done</Badge>}
       </div>
       {item.status === "failed" ? (
-        <p className="text-[13px] text-danger">
+        <p className="text-caption text-danger">
           {item.error ?? "Upload failed."}
         </p>
       ) : (
@@ -39,7 +39,7 @@ export function UploadFileRow({ item }: { item: UploadItem }) {
               style={{ width: `${item.progress}%` }}
             />
           </div>
-          <p className="text-[13px] text-muted">{stageLabel(item.progress)}</p>
+          <p className="text-caption text-muted">{stageLabel(item.progress)}</p>
         </>
       )}
     </li>

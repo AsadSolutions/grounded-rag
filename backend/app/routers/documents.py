@@ -1,17 +1,33 @@
-from fastapi import APIRouter, File, Form, HTTPException, Query, Response, UploadFile
+from fastapi import APIRouter, Depends, File, Form, HTTPException, Query, Request, Response, UploadFile
 
+from app.config import get_settings
 from app.document_catalog import delete_tenant_document, list_tenant_documents
 from app.ingest.pipeline import ingest_document
 from app.models import DocumentSummary, IngestResult
+from app.rate_limit import RateLimiter
 from app.tenant_guard import ensure_tenant_is_writable
 
 router = APIRouter()
+
+_upload_rate_limiter = RateLimiter(
+    max_requests=get_settings().upload_rate_limit_per_minute, window_seconds=60
+)
+
+
+def _check_upload_rate_limit(request: Request) -> None:
+    # Indirection (rather than `Depends(_upload_rate_limiter)` directly) so
+    # tests can monkeypatch the module-level `_upload_rate_limiter` name and
+    # have it take effect: FastAPI resolves a Depends() target once, at
+    # route-definition time, so binding the object itself as the default
+    # would freeze in the original instance forever.
+    _upload_rate_limiter(request)
 
 
 @router.post("/api/documents", response_model=IngestResult)
 async def upload_document(
     tenant_id: str = Form(...),
     file: UploadFile = File(...),
+    _: None = Depends(_check_upload_rate_limit),
 ) -> IngestResult:
     ensure_tenant_is_writable(tenant_id)
     content = await file.read()

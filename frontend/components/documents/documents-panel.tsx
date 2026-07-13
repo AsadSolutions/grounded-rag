@@ -62,7 +62,7 @@ export function DocumentsPanel({
     return (
       <button
         onClick={() => setCollapsed(false)}
-        className="fixed bottom-6 right-6 z-30 cursor-pointer rounded-button border border-border bg-surface px-4 py-2 text-[13px] font-medium text-text shadow-[var(--shadow-card)]"
+        className="fixed bottom-6 right-6 z-30 cursor-pointer rounded-button border border-border bg-surface px-4 py-2 text-caption font-medium text-text shadow-card"
       >
         Documents ({items.length})
       </button>
@@ -71,12 +71,12 @@ export function DocumentsPanel({
 
   return (
     <aside
-      className={`flex h-full w-[300px] shrink-0 flex-col gap-4 border-l border-border bg-surface p-4 ${
+      className={`flex h-full w-docs-panel shrink-0 flex-col gap-4 border-l border-border bg-surface p-4 ${
         isNarrow ? "fixed inset-y-0 right-0 z-30" : ""
       }`}
     >
       <div className="flex items-center justify-between">
-        <h2 className="font-serif text-[20px] text-text">Documents</h2>
+        <h2 className="font-serif text-xl text-text">Documents</h2>
         {isNarrow && (
           <button
             onClick={() => setCollapsed(true)}
@@ -88,7 +88,7 @@ export function DocumentsPanel({
         )}
       </div>
       {items.length === 0 ? (
-        <p className="text-[15px] leading-[1.6] text-muted">
+        <p className="text-body leading-reading text-muted">
           No documents yet. Add some to start asking.
         </p>
       ) : (
@@ -101,7 +101,7 @@ export function DocumentsPanel({
               }`}
             >
               <div className="flex items-start justify-between gap-2">
-                <p className="text-[14px] font-medium text-text">{doc.name}</p>
+                <p className="text-sm font-medium text-text">{doc.name}</p>
                 {!isDemo && (
                   <button
                     onClick={() => setPendingDelete(doc)}
@@ -112,7 +112,7 @@ export function DocumentsPanel({
                   </button>
                 )}
               </div>
-              <p className="mt-1 text-[13px] text-muted">
+              <p className="mt-1 text-caption text-muted">
                 {doc.chunkCount} chunks ·{" "}
                 {doc.uploadedAt
                   ? new Date(doc.uploadedAt).toLocaleDateString()

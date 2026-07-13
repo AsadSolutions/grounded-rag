@@ -52,6 +52,35 @@
   --radius-card: 12px;
   --radius-button: 8px;
 
+  --radius-control: 6px;
+
+  /* Type scale (DESIGN.md): values that don't already match Tailwind's
+     default scale (12/14/16/18/20) get a named token; those five reuse
+     the stock text-xs/sm/base/lg/xl utilities directly. */
+  --text-eyebrow: 11px;
+  --text-caption: 13px;
+  --text-body: 15px;
+  --text-title: 28px;
+  --tracking-eyebrow: 0.08em;
+  --leading-reading: 1.6;
+
+  --shadow-card: var(--shadow-card);
+
+  /* Fixed component widths reused across the shell and overlays. */
+  --spacing-sidebar: 260px;
+  --spacing-drawer: 420px;
+  --spacing-mobile-sheet: 280px;
+  --spacing-docs-panel: 300px;
+  --spacing-toast: 280px;
+  --spacing-popover-wide: 280px;
+  --spacing-popover: 200px;
+  --spacing-popover-medium: 240px;
+  --spacing-chat-input-max: 200px;
+  --spacing-upload-well: 360px;
+  --spacing-error-card: 520px;
+  --spacing-evals-copy: 640px;
+  --spacing-drawer-header: 61px;
+
   --max-width-content: 1080px;
 
   --animate-fade-slide-in: fade-slide-in 200ms ease-out;

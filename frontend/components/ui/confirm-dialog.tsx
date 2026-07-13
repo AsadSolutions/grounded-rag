@@ -38,17 +38,17 @@ export function ConfirmDialog({
         aria-labelledby="confirm-dialog-title"
         aria-describedby="confirm-dialog-description"
         tabIndex={-1}
-        className="relative w-full max-w-[420px] rounded-card border border-border bg-surface p-5 shadow-[var(--shadow-card)] focus:outline-none"
+        className="relative w-full max-w-drawer rounded-card border border-border bg-surface p-5 shadow-card focus:outline-none"
       >
         <h2
           id="confirm-dialog-title"
-          className="font-serif text-[18px] text-text"
+          className="font-serif text-lg text-text"
         >
           {title}
         </h2>
         <p
           id="confirm-dialog-description"
-          className="mt-2 text-[15px] leading-[1.6] text-muted"
+          className="mt-2 text-body leading-reading text-muted"
         >
           {description}
         </p>

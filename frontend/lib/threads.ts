@@ -27,7 +27,12 @@ function storageKey(tenantId: string): string {
 export function listThreads(tenantId: string): ChatThread[] {
   const raw = window.localStorage.getItem(storageKey(tenantId));
   if (!raw) return [];
-  return JSON.parse(raw) as ChatThread[];
+  try {
+    return JSON.parse(raw) as ChatThread[];
+  } catch {
+    console.error(`Corrupt thread data for tenant ${tenantId}, resetting.`);
+    return [];
+  }
 }
 
 function persist(tenantId: string, threads: ChatThread[]): void {

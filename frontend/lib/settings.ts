@@ -20,7 +20,12 @@ export const DEFAULT_SETTINGS: Settings = {
 export function getSettings(): Settings {
   const raw = window.localStorage.getItem(SETTINGS_STORAGE_KEY);
   if (!raw) return DEFAULT_SETTINGS;
-  return { ...DEFAULT_SETTINGS, ...(JSON.parse(raw) as Partial<Settings>) };
+  try {
+    return { ...DEFAULT_SETTINGS, ...(JSON.parse(raw) as Partial<Settings>) };
+  } catch {
+    console.error("Corrupt settings data, resetting to defaults.");
+    return DEFAULT_SETTINGS;
+  }
 }
 
 export function setSettings(partial: Partial<Settings>): Settings {

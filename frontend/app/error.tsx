@@ -32,26 +32,26 @@ export default function Error({
 
   return (
     <div className="mx-auto flex w-full max-w-content flex-1 flex-col items-center justify-center gap-6 px-6 py-24 text-center">
-      <div className="flex max-w-[520px] flex-col gap-4 rounded-card border border-border bg-surface p-8">
-        <h1 className="font-serif text-[20px] text-text">
+      <div className="flex max-w-error-card flex-col gap-4 rounded-card border border-border bg-surface p-8">
+        <h1 className="font-serif text-xl text-text">
           {connectivityIssue
             ? "Can't reach the GroundedRAG API"
             : "Something went wrong"}
         </h1>
-        <p className="text-[15px] leading-[1.6] text-muted">
+        <p className="text-body leading-reading text-muted">
           {connectivityIssue ? (
             <>
               The backend at{" "}
-              <code className="rounded-button bg-surface-2 px-1.5 py-0.5 font-mono text-[13px] text-text">
+              <code className="rounded-button bg-surface-2 px-1.5 py-0.5 font-mono text-caption text-text">
                 {API_BASE_URL}
               </code>{" "}
               didn&apos;t respond. If you&apos;re running this locally, make
               sure the FastAPI server is started (
-              <code className="rounded-button bg-surface-2 px-1.5 py-0.5 font-mono text-[13px] text-text">
+              <code className="rounded-button bg-surface-2 px-1.5 py-0.5 font-mono text-caption text-text">
                 uvicorn app.main:app --reload
               </code>
               ) and Qdrant is up (
-              <code className="rounded-button bg-surface-2 px-1.5 py-0.5 font-mono text-[13px] text-text">
+              <code className="rounded-button bg-surface-2 px-1.5 py-0.5 font-mono text-caption text-text">
                 docker compose up -d qdrant
               </code>
               ).

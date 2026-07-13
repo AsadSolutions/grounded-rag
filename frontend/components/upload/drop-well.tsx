@@ -60,13 +60,13 @@ export function DropWell({
             : `cursor-pointer ${isDragOver ? "border-accent" : "border-border"}`
         }`}
       >
-        <p className="text-[15px] text-text">
+        <p className="text-body text-text">
           Drag and drop files here, or{" "}
           <span className="text-accent underline underline-offset-4">
             browse
           </span>
         </p>
-        <p className="text-[13px] text-muted">PDF, TXT, or MD</p>
+        <p className="text-caption text-muted">PDF, TXT, or MD</p>
         <input
           ref={inputRef}
           type="file"
@@ -81,7 +81,7 @@ export function DropWell({
         />
       </div>
       {rejectedNames.length > 0 && (
-        <p className="text-[13px] text-danger">
+        <p className="text-caption text-danger">
           {rejectedNames.length === 1
             ? `"${rejectedNames[0]}" isn't supported.`
             : `${rejectedNames.length} files aren't supported (${rejectedNames.join(", ")}).`}{" "}

@@ -46,7 +46,7 @@ export default function RootLayout({
       <body className="min-h-full flex flex-col antialiased">
         <div
           suppressHydrationWarning
-          style={{ display: "contents" }}
+          className="contents"
           dangerouslySetInnerHTML={{
             __html: `<script id="theme-init">${THEME_INIT_SCRIPT}</script>`,
           }}

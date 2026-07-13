@@ -10,7 +10,7 @@ export function SettingsPopover({
   trigger: ReactElement<{ onClick?: () => void }>;
 }) {
   return (
-    <Popover trigger={trigger} align="start" placement="top" width={280}>
+    <Popover trigger={trigger} align="start" placement="top" variant="wide">
       <SettingsPanel tenantId={tenantId} />
     </Popover>
   );

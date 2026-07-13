@@ -14,7 +14,9 @@
 [![LangGraph](https://img.shields.io/badge/LangGraph-orchestration-orange)](https://github.com/langchain-ai/langgraph)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
-[**Live Demo**](https://grounded-rag.vercel.app) · [**Eval Results**](#evaluation-results) · [**Architecture**](#architecture) · [**Quickstart**](#quickstart)
+<!-- [**Live Demo**](https://grounded-rag.vercel.app) ·  -->
+
+[**Eval Results**](#evaluation-results) · [**Architecture**](#architecture) · [**Quickstart**](#quickstart)
 
 <!-- TODO: record and embed demo GIF here after deploy -->
 <!-- ![demo](assets/demo.gif) -->

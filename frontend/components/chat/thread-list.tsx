@@ -41,14 +41,14 @@ export function ThreadList() {
           selectThread(null);
         }}
         disabled={isStreamingActive}
-        className="mb-2 flex cursor-pointer items-center gap-2 rounded-button border border-dashed border-border px-2 py-1.5 text-[13px] font-medium text-muted transition-colors duration-150 ease-out hover:bg-surface-2 hover:text-text disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-transparent disabled:hover:text-muted"
+        className="mb-2 flex cursor-pointer items-center gap-2 rounded-button border border-dashed border-border px-2 py-1.5 text-caption font-medium text-muted transition-colors duration-150 ease-out hover:bg-surface-2 hover:text-text disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-transparent disabled:hover:text-muted"
       >
         <PlusIcon />
         New chat
       </button>
 
       {threads.length === 0 ? (
-        <p className="px-2 py-4 text-[13px] text-muted">No chats yet.</p>
+        <p className="px-2 py-4 text-caption text-muted">No chats yet.</p>
       ) : (
         threads.map((thread) => (
           <div
@@ -67,7 +67,7 @@ export function ThreadList() {
                   if (e.key === "Enter") commitRename();
                   if (e.key === "Escape") setRenamingId(null);
                 }}
-                className="flex-1 rounded-[4px] border border-border bg-surface px-1.5 py-0.5 text-[13px] text-text focus-visible:outline-none"
+                className="flex-1 rounded border border-border bg-surface px-1.5 py-0.5 text-caption text-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
               />
             ) : (
               <button
@@ -77,25 +77,25 @@ export function ThreadList() {
                 }}
                 disabled={isStreamingActive}
                 title={thread.title}
-                className={`flex-1 cursor-pointer truncate text-left text-[13px] disabled:cursor-not-allowed disabled:opacity-50 ${
+                className={`flex-1 cursor-pointer truncate text-left text-caption disabled:cursor-not-allowed disabled:opacity-50 ${
                   thread.id === activeThreadId ? "text-accent" : "text-text"
                 }`}
               >
                 {thread.title}
               </button>
             )}
-            <div className="hidden items-center gap-0.5 group-hover:flex">
+            <div className="hidden items-center gap-0.5 group-hover:flex group-focus-within:flex">
               <button
                 aria-label={`Rename ${thread.title}`}
                 onClick={() => startRename(thread.id, thread.title)}
-                className="cursor-pointer rounded-[4px] p-1 text-muted hover:bg-surface hover:text-text"
+                className="cursor-pointer rounded p-1 text-muted hover:bg-surface hover:text-text"
               >
                 <PencilIcon />
               </button>
               <button
                 aria-label={`Delete ${thread.title}`}
                 onClick={() => setPendingDeleteId(thread.id)}
-                className="cursor-pointer rounded-[4px] p-1 text-muted hover:bg-surface hover:text-danger"
+                className="cursor-pointer rounded p-1 text-muted hover:bg-surface hover:text-danger"
               >
                 <TrashIcon />
               </button>

@@ -52,3 +52,29 @@ def test_run_expiry_sweep_logs_and_survives_exceptions(monkeypatch, caplog):
         asyncio.run(main_module._run_expiry_sweep())
 
     assert "expiry sweep failed" in caplog.text.lower()
+
+
+def test_expiry_loop_runs_sweep_repeatedly_with_the_configured_interval(monkeypatch):
+    call_count = 0
+    sleep_calls: list[float] = []
+
+    async def _fake_sweep() -> None:
+        nonlocal call_count
+        call_count += 1
+        if call_count >= 3:
+            raise asyncio.CancelledError
+
+    async def _fake_sleep(seconds: float) -> None:
+        sleep_calls.append(seconds)
+
+    monkeypatch.setattr(main_module, "_run_expiry_sweep", _fake_sweep)
+    monkeypatch.setattr(main_module.asyncio, "sleep", _fake_sleep)
+
+    with pytest.raises(asyncio.CancelledError):
+        asyncio.run(main_module._expiry_loop())
+
+    assert call_count == 3
+    assert sleep_calls == [
+        main_module.EXPIRY_INTERVAL_SECONDS,
+        main_module.EXPIRY_INTERVAL_SECONDS,
+    ]

@@ -20,7 +20,7 @@ export function SettingsPanel({ tenantId }: { tenantId: string | null }) {
   return (
     <div className="flex flex-col gap-5">
       <div className="flex flex-col gap-2">
-        <p className="text-[11px] font-medium uppercase tracking-[0.08em] text-muted">
+        <p className="text-eyebrow font-medium uppercase tracking-eyebrow text-muted">
           Theme
         </p>
         <ThemeToggle />
@@ -40,7 +40,7 @@ export function SettingsPanel({ tenantId }: { tenantId: string | null }) {
         }
       />
       <div className="flex flex-col gap-2">
-        <p className="text-[11px] font-medium uppercase tracking-[0.08em] text-muted">
+        <p className="text-eyebrow font-medium uppercase tracking-eyebrow text-muted">
           Density
         </p>
         <div className="flex w-full rounded-button border border-border p-0.5">
@@ -49,7 +49,7 @@ export function SettingsPanel({ tenantId }: { tenantId: string | null }) {
               key={option}
               onClick={() => updateSettings({ density: option })}
               aria-pressed={settings.density === option}
-              className={`flex-1 cursor-pointer rounded-[6px] px-3 py-1.5 text-center text-[13px] font-medium capitalize transition-colors duration-150 ease-out ${
+              className={`flex-1 cursor-pointer rounded-control px-3 py-1.5 text-center text-caption font-medium capitalize transition-colors duration-150 ease-out ${
                 settings.density === option
                   ? "bg-accent text-white"
                   : "text-muted hover:text-text"
@@ -87,7 +87,7 @@ function SettingsToggleRow({
 }) {
   return (
     <div className="flex items-center justify-between">
-      <span className="text-[14px] text-text">{label}</span>
+      <span className="text-sm text-text">{label}</span>
       <button
         role="switch"
         aria-checked={checked}

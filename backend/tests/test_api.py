@@ -127,3 +127,29 @@ def test_upload_to_scratch_tenant_is_allowed(monkeypatch, fake_embed_fn):
 
     assert resp.status_code == 200
     assert resp.json()["tenant_id"] == "scratch-abc123"
+
+
+def test_upload_returns_429_after_exceeding_the_rate_limit(monkeypatch, fake_embed_fn):
+    import app.routers.documents as documents_module
+    from app.rate_limit import RateLimiter
+
+    _wire_fakes(monkeypatch, fake_embed_fn)
+    monkeypatch.setattr(
+        documents_module, "_upload_rate_limiter", RateLimiter(max_requests=1, window_seconds=60)
+    )
+    api = TestClient(app)
+    file_bytes = b"hello world, this is a test document."
+
+    first = api.post(
+        "/api/documents",
+        data={"tenant_id": "t_scratch1"},
+        files={"file": ("a.txt", file_bytes, "text/plain")},
+    )
+    second = api.post(
+        "/api/documents",
+        data={"tenant_id": "t_scratch1"},
+        files={"file": ("b.txt", file_bytes, "text/plain")},
+    )
+
+    assert first.status_code == 200
+    assert second.status_code == 429

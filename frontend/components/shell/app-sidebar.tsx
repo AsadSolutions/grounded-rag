@@ -16,7 +16,7 @@ export function AppSidebar({
       {!inSheet && (
         <div className="flex items-center gap-2 px-4 py-4">
           <Link href="/" className="flex items-center gap-2">
-            <span className="font-serif text-[16px] font-semibold text-text">
+            <span className="font-serif text-base font-semibold text-text">
               Grounded<span className="text-accent">RAG</span>
             </span>
           </Link>
@@ -32,7 +32,7 @@ export function AppSidebar({
         {tenantId ? (
           <ThreadList />
         ) : (
-          <p className="px-2 py-4 text-[13px] text-muted">
+          <p className="px-2 py-4 text-caption text-muted">
             Upload documents to start chatting.
           </p>
         )}

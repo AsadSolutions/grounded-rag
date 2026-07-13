@@ -17,7 +17,7 @@ export function MobileSidebarSheet({ tenantId }: { tenantId: string | null }) {
         >
           <MenuIcon />
         </button>
-        <span className="font-serif text-[15px] font-semibold text-text">
+        <span className="font-serif text-body font-semibold text-text">
           Grounded<span className="text-accent">RAG</span>
         </span>
         <span className="size-9" aria-hidden="true" />

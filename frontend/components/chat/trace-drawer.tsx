@@ -22,7 +22,7 @@ export function TraceDrawer({
           ))}
         </ol>
       ) : (
-        <p className="text-[15px] text-muted">No trace available.</p>
+        <p className="text-body text-muted">No trace available.</p>
       )}
     </Drawer>
   );
@@ -33,15 +33,15 @@ function TraceStep({ step }: { step: TraceEntry }) {
     case "retrieve":
       return (
         <div className="flex flex-col gap-2">
-          <p className="text-[11px] font-medium uppercase tracking-[0.08em] text-muted">
+          <p className="text-eyebrow font-medium uppercase tracking-eyebrow text-muted">
             Retrieve
           </p>
-          <p className="font-mono text-[13px] text-text">{step.query}</p>
+          <p className="font-mono text-caption text-text">{step.query}</p>
           <ul className="flex flex-col gap-1">
             {step.chunks.map((chunk) => (
               <li
                 key={chunk.chunkId}
-                className="font-mono text-[13px] text-muted"
+                className="font-mono text-caption text-muted"
               >
                 {chunk.docName} · chunk {chunk.chunkIndex}
               </li>
@@ -52,14 +52,14 @@ function TraceStep({ step }: { step: TraceEntry }) {
     case "grade":
       return (
         <div className="flex flex-col gap-2">
-          <p className="text-[11px] font-medium uppercase tracking-[0.08em] text-muted">
+          <p className="text-eyebrow font-medium uppercase tracking-eyebrow text-muted">
             Grade
           </p>
           <div className="flex flex-wrap gap-1.5">
             {step.grades.map((grade) => (
               <span
                 key={grade.chunkId}
-                className={`rounded-button bg-surface-2 px-2 py-1 font-mono text-[13px] ${
+                className={`rounded-button bg-surface-2 px-2 py-1 font-mono text-caption ${
                   grade.relevant ? "text-ok" : "text-muted line-through"
                 }`}
               >
@@ -72,44 +72,44 @@ function TraceStep({ step }: { step: TraceEntry }) {
     case "rewrite":
       return (
         <div className="flex flex-col gap-2">
-          <p className="text-[11px] font-medium uppercase tracking-[0.08em] text-muted">
+          <p className="text-eyebrow font-medium uppercase tracking-eyebrow text-muted">
             Rewrite (attempt {step.attempt})
           </p>
-          <p className="font-mono text-[13px] text-muted line-through">
+          <p className="font-mono text-caption text-muted line-through">
             {step.originalQuery}
           </p>
-          <p className="font-mono text-[13px] text-text">
+          <p className="font-mono text-caption text-text">
             {step.rewrittenQuery}
           </p>
         </div>
       );
     case "generate":
       return (
-        <p className="text-[11px] font-medium uppercase tracking-[0.08em] text-muted">
+        <p className="text-eyebrow font-medium uppercase tracking-eyebrow text-muted">
           Generate (attempt {step.attempt})
         </p>
       );
     case "groundedness_check":
       return (
         <div className="flex flex-col gap-2">
-          <p className="text-[11px] font-medium uppercase tracking-[0.08em] text-muted">
+          <p className="text-eyebrow font-medium uppercase tracking-eyebrow text-muted">
             Groundedness check
           </p>
           <Badge variant={step.verdict === "grounded" ? "ok" : "danger"}>
             {step.verdict === "grounded" ? "Grounded" : "Not grounded"}
           </Badge>
           {step.reason && (
-            <p className="text-[13px] text-muted">{step.reason}</p>
+            <p className="text-caption text-muted">{step.reason}</p>
           )}
         </div>
       );
     case "log":
       return (
         <div className="flex flex-col gap-2">
-          <p className="text-[11px] font-medium uppercase tracking-[0.08em] text-muted">
+          <p className="text-eyebrow font-medium uppercase tracking-eyebrow text-muted">
             {step.node}
           </p>
-          <p className="text-[13px] text-text">{step.message}</p>
+          <p className="text-caption text-text">{step.message}</p>
         </div>
       );
   }

@@ -19,7 +19,7 @@ export function ThemeToggle() {
           key={option.value}
           onClick={() => setPreference(option.value)}
           aria-pressed={preference === option.value}
-          className={`flex-1 cursor-pointer rounded-[6px] px-3 py-1.5 text-center text-[13px] font-medium transition-colors duration-150 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent ${
+          className={`flex-1 cursor-pointer rounded-control px-3 py-1.5 text-center text-caption font-medium transition-colors duration-150 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent ${
             preference === option.value
               ? "bg-accent text-white"
               : "text-muted hover:text-text"

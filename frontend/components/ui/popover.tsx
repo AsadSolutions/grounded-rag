@@ -15,7 +15,7 @@ type PopoverProps = {
   children: ReactNode;
   align?: "start" | "end";
   placement?: "top" | "bottom";
-  width?: number;
+  variant?: "default" | "wide" | "medium";
 };
 
 export function Popover({
@@ -23,13 +23,19 @@ export function Popover({
   children,
   align = "start",
   placement = "bottom",
-  width,
+  variant = "default",
 }: PopoverProps) {
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLElement | null>(null);
+  const wasOpenRef = useRef(false);
 
   useEffect(() => {
     if (!open) return;
+    triggerRef.current = rootRef.current?.querySelector<HTMLElement>(
+      "button, a, [tabindex]",
+    ) ?? null;
+    wasOpenRef.current = true;
 
     function handlePointerDown(e: PointerEvent) {
       if (rootRef.current?.contains(e.target as Node)) return;
@@ -38,9 +44,6 @@ export function Popover({
     function handleKeyDown(e: KeyboardEvent) {
       if (e.key !== "Escape") return;
       setOpen(false);
-      rootRef.current
-        ?.querySelector<HTMLElement>("button, a, [tabindex]")
-        ?.focus();
     }
 
     document.addEventListener("pointerdown", handlePointerDown);
@@ -49,6 +52,11 @@ export function Popover({
       document.removeEventListener("pointerdown", handlePointerDown);
       document.removeEventListener("keydown", handleKeyDown);
     };
+  }, [open]);
+
+  useEffect(() => {
+    if (open || !wasOpenRef.current) return;
+    triggerRef.current?.focus();
   }, [open]);
 
   const triggerElement = isValidElement(trigger)
@@ -61,8 +69,13 @@ export function Popover({
       {open && (
         <div
           role="dialog"
-          style={width ? { width } : undefined}
-          className={`absolute z-40 ${width ? "" : "min-w-[200px]"} overflow-hidden rounded-card border border-border bg-surface p-3 shadow-[var(--shadow-card)] transition-all duration-150 ease-out ${
+          className={`absolute z-40 ${
+            variant === "wide"
+              ? "w-popover-wide"
+              : variant === "medium"
+                ? "w-popover-medium"
+                : "min-w-popover"
+          } overflow-hidden rounded-card border border-border bg-surface p-3 shadow-card transition-all duration-150 ease-out ${
             placement === "top" ? "bottom-[calc(100%+8px)]" : "top-[calc(100%+8px)]"
           } ${align === "end" ? "right-0" : "left-0"}`}
         >

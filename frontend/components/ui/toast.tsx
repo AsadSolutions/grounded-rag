@@ -12,7 +12,7 @@ export function Toast({
   return (
     <div
       role="status"
-      className="animate-fade-slide-in pointer-events-auto flex items-center gap-2.5 rounded-card border border-border bg-surface px-4 py-3 text-[14px] text-text shadow-[var(--shadow-card)]"
+      className="animate-fade-slide-in pointer-events-auto flex items-center gap-2.5 rounded-card border border-border bg-surface px-4 py-3 text-sm text-text shadow-card"
     >
       <span
         className={variant === "success" ? "text-ok" : "text-danger"}
@@ -20,11 +20,11 @@ export function Toast({
       >
         {variant === "success" ? <CheckIcon /> : <ErrorIcon />}
       </span>
-      <span className="max-w-[280px]">{message}</span>
+      <span className="max-w-toast">{message}</span>
       <button
         onClick={onDismiss}
         aria-label="Dismiss"
-        className="ml-1 cursor-pointer rounded-[4px] p-0.5 text-muted transition-colors duration-150 ease-out hover:bg-surface-2 hover:text-text"
+        className="ml-1 cursor-pointer rounded p-0.5 text-muted transition-colors duration-150 ease-out hover:bg-surface-2 hover:text-text"
       >
         <CloseIcon />
       </button>
