@@ -17,7 +17,11 @@ export default async function ChatPage({
   return (
     <div className="flex flex-1 overflow-hidden">
       <ChatPanel tenantId={tenantId} />
-      <DocumentsPanel tenantId={tenantId} documents={documents} isDemo={isDemo} />
+      <DocumentsPanel
+        tenantId={tenantId}
+        documents={documents}
+        isDemo={isDemo}
+      />
     </div>
   );
 }
