@@ -21,7 +21,7 @@ IntentLabel = Literal["smalltalk", "document_meta", "document_question"]
 _GREETING_PATTERN = re.compile(
     r"^(hi|hello|hey|hiya|yo)([,!]?\s*(there|team))?[!.]*$"
     r"|^good (morning|afternoon|evening)[!.]*$"
-    r"|^(hi|hello|hey)[,!]?\s*how are you\??$",
+    r"|^((hi|hello|hey)[,!]?\s*)?how are you\??$",
     re.IGNORECASE,
 )
 _GRATITUDE_PATTERN = re.compile(

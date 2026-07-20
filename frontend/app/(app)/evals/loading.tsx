@@ -1,6 +1,6 @@
 export default function Loading() {
   return (
-    <div className="mx-auto flex w-full max-w-content flex-col gap-8 px-6 py-16">
+    <div className="mx-auto flex w-full max-w-content flex-col gap-8 overflow-y-auto px-6 py-16">
       <div className="h-8 w-32 animate-pulse rounded-card bg-surface-2" />
       <div className="h-4 w-full max-w-evals-copy animate-pulse rounded-card bg-surface-2" />
       <div className="overflow-hidden rounded-card border border-border bg-surface">

@@ -6,7 +6,7 @@ import { useChatStream } from "@/lib/useChatStream";
 import { useSettings } from "@/lib/settings-context";
 import { MessageBubble } from "./message-bubble";
 import { AssistantMessage } from "./assistant-message";
-import { AnswerFooter } from "./answer-footer";
+import { AssistantAnswer } from "./assistant-answer";
 import { TraceDrawer } from "./trace-drawer";
 import { ChatInput } from "./chat-input";
 import { Badge } from "@/components/ui/badge";
@@ -129,21 +129,13 @@ export function ChatPanel({ tenantId }: { tenantId: string }) {
                   {message.error ? (
                     <Badge variant="danger">{message.error}</Badge>
                   ) : (
-                    <>
-                      <AssistantMessage
-                        content={message.content}
-                        streaming={false}
-                      />
-                      {!message.trace.skippedPipeline && (
-                        <AnswerFooter
-                          sourceCount={message.sources.length}
-                          onShowReasoning={() => {
-                            setDrawerTrace(message.trace);
-                            setDrawerOpen(true);
-                          }}
-                        />
-                      )}
-                    </>
+                    <AssistantAnswer
+                      message={message}
+                      onShowReasoning={() => {
+                        setDrawerTrace(message.trace);
+                        setDrawerOpen(true);
+                      }}
+                    />
                   )}
                 </div>
               ),
@@ -158,6 +150,7 @@ export function ChatPanel({ tenantId }: { tenantId: string }) {
                   content={stream.answer}
                   streaming
                   stage={stream.stage}
+                  sources={stream.sources}
                 />
               )}
             </div>

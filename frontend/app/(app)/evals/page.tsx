@@ -14,7 +14,7 @@ export default async function EvalsPage() {
   const results = await getEvalResults();
 
   return (
-    <div className="mx-auto flex w-full max-w-content flex-col gap-8 px-4 py-10 sm:px-6 sm:py-16">
+    <div className="mx-auto flex w-full max-w-content flex-col gap-8 overflow-y-auto px-4 py-10 sm:px-6 sm:py-16">
       <h1 className="font-serif text-title text-text">Evals</h1>
       <p className="max-w-evals-copy text-body leading-reading text-muted">
         GroundedRAG grades itself on three numbers. Retrieval hit rate is how
