@@ -29,15 +29,38 @@ class ChunkGrade(BaseModel):
     reason: str
 
 
+class TracedChunk(BaseModel):
+    """Chunk identity for trace display: joined from GraphState.retrieved_chunks
+    at serialization time, never computed by a graph node."""
+
+    chunk_id: str
+    doc_name: str
+    chunk_index: int
+
+
+class TracedGrade(BaseModel):
+    """A ChunkGrade enriched with doc identity for trace display, same
+    join-at-serialization approach as TracedChunk."""
+
+    chunk_id: str
+    doc_name: str
+    chunk_index: int
+    relevant: bool
+    reason: str
+
+
 class TraceEntry(BaseModel):
     node: str
     message: str
     query: str | None = None
     chunk_ids: list[str] | None = None
+    chunks: list[TracedChunk] | None = None
     grades: list[ChunkGrade] | None = None
+    graded_chunks: list[TracedGrade] | None = None
     old_query: str | None = None
     new_query: str | None = None
     is_regeneration: bool | None = None
+    answer: str | None = None
     grounded: bool | None = None
     unsupported_claims: list[str] | None = None
 
@@ -90,7 +113,14 @@ class EvalMetric(BaseModel):
     delta: float
 
 
+class JudgeAgreement(BaseModel):
+    agreement_rate: float
+    agreed: int
+    total: int
+
+
 class EvalResultsResponse(BaseModel):
     generated_at: str
     sample: bool
     metrics: list[EvalMetric]
+    judge_agreement: JudgeAgreement

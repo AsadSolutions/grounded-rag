@@ -36,16 +36,30 @@ export type ChunkGrade = {
   reason?: string;
 };
 
+export type TracedChunk = {
+  chunkId: string;
+  docName: string;
+  chunkIndex: number;
+};
+
+export type TracedGrade = {
+  chunkId: string;
+  docName: string;
+  chunkIndex: number;
+  relevant: boolean;
+  reason?: string;
+};
+
 export type TraceEntry =
-  | { step: "retrieve"; query: string; chunks: RetrievedChunk[] }
-  | { step: "grade"; grades: ChunkGrade[] }
+  | { step: "retrieve"; query: string; chunks: TracedChunk[] }
+  | { step: "grade"; grades: TracedGrade[] }
   | {
       step: "rewrite";
       attempt: number;
       originalQuery: string;
       rewrittenQuery: string;
     }
-  | { step: "generate"; attempt: number }
+  | { step: "generate"; attempt: number; isRegeneration: boolean; answer: string }
   | {
       step: "groundedness_check";
       verdict: "grounded" | "not_grounded";
@@ -75,10 +89,17 @@ export type EvalMetric = {
   delta: number;
 };
 
+export type JudgeAgreement = {
+  agreementRate: number;
+  agreed: number;
+  total: number;
+};
+
 export type EvalResults = {
   generatedAt: string;
   sample: boolean;
   metrics: EvalMetric[];
+  judgeAgreement: JudgeAgreement;
 };
 
 export type ApiClient = {

@@ -8,13 +8,14 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 from app.eval.run import RESULTS_PATH
-from app.models import EvalMetric, EvalResultsResponse
+from app.models import EvalMetric, EvalResultsResponse, JudgeAgreement
 from fastapi import APIRouter, HTTPException
 
 router = APIRouter()
 
 _PERCENT_RE = re.compile(r"^(-?\d+(?:\.\d+)?)%")
 _DELTA_RE = re.compile(r"^([+-]?\d+(?:\.\d+)?)pp")
+_COMBINED_RE = re.compile(r"^-\s*Combined:\s*(\d+)/(\d+)\s*\((\d+(?:\.\d+)?)%\)")
 
 
 def _parse_percent_cell(cell: str) -> float:
@@ -52,6 +53,27 @@ def _extract_overall_table_rows(markdown: str) -> list[str]:
     return table_lines[2:]  
 
 
+def _extract_judge_agreement(markdown: str) -> JudgeAgreement:
+    lines = markdown.splitlines()
+    start = next((i for i, line in enumerate(lines) if line.strip().startswith("### Judge agreement")), None)
+    if start is None:
+        raise ValueError("RESULTS.md has no '### Judge agreement' section")
+
+    for line in lines[start + 1 :]:
+        stripped = line.strip()
+        if stripped.startswith("##"):
+            break
+        match = _COMBINED_RE.match(stripped)
+        if match:
+            agreed, total, rate = match.groups()
+            return JudgeAgreement(
+                agreement_rate=round(float(rate) / 100, 6),
+                agreed=int(agreed),
+                total=int(total),
+            )
+    raise ValueError("RESULTS.md 'Judge agreement' section has no 'Combined:' line")
+
+
 def parse_eval_results(markdown: str, generated_at: str) -> EvalResultsResponse:
     metrics = []
     for row in _extract_overall_table_rows(markdown):
@@ -64,7 +86,12 @@ def parse_eval_results(markdown: str, generated_at: str) -> EvalResultsResponse:
                 delta=_parse_delta_cell(delta_cell),
             )
         )
-    return EvalResultsResponse(generated_at=generated_at, sample=False, metrics=metrics)
+    return EvalResultsResponse(
+        generated_at=generated_at,
+        sample=False,
+        metrics=metrics,
+        judge_agreement=_extract_judge_agreement(markdown),
+    )
 
 
 def load_eval_results(path: Path) -> EvalResultsResponse:

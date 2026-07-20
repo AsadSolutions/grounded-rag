@@ -23,4 +23,9 @@ export const MOCK_EVAL_RESULTS: EvalResults = {
       delta: 0.4,
     },
   ],
+  judgeAgreement: {
+    agreementRate: 0.844,
+    agreed: 76,
+    total: 90,
+  },
 };

@@ -107,15 +107,30 @@ type ChunkGradeResponse = {
   relevant: boolean;
   reason?: string;
 };
+type TracedChunkResponse = {
+  chunk_id: string;
+  doc_name: string;
+  chunk_index: number;
+};
+type TracedGradeResponse = {
+  chunk_id: string;
+  doc_name: string;
+  chunk_index: number;
+  relevant: boolean;
+  reason?: string;
+};
 type TraceEntryResponse = {
   node: string;
   message: string;
   query?: string;
   chunk_ids?: string[];
+  chunks?: TracedChunkResponse[];
   grades?: ChunkGradeResponse[];
+  graded_chunks?: TracedGradeResponse[];
   old_query?: string;
   new_query?: string;
   is_regeneration?: boolean;
+  answer?: string;
   grounded?: boolean;
   unsupported_claims?: string[];
 };
@@ -126,12 +141,27 @@ function makeTraceEntryMapper(): (raw: TraceEntryResponse) => TraceEntry {
 
   return (raw: TraceEntryResponse): TraceEntry => {
     switch (raw.node) {
+      case "retrieve":
+        if (raw.query !== undefined && raw.chunks) {
+          return {
+            step: "retrieve",
+            query: raw.query,
+            chunks: raw.chunks.map((c) => ({
+              chunkId: c.chunk_id,
+              docName: c.doc_name,
+              chunkIndex: c.chunk_index,
+            })),
+          };
+        }
+        break;
       case "grade":
-        if (raw.grades) {
+        if (raw.graded_chunks) {
           return {
             step: "grade",
-            grades: raw.grades.map((g) => ({
+            grades: raw.graded_chunks.map((g) => ({
               chunkId: g.chunk_id,
+              docName: g.doc_name,
+              chunkIndex: g.chunk_index,
               relevant: g.relevant,
               reason: g.reason,
             })),
@@ -150,9 +180,14 @@ function makeTraceEntryMapper(): (raw: TraceEntryResponse) => TraceEntry {
         }
         break;
       case "generate":
-        if (raw.is_regeneration !== undefined) {
+        if (raw.is_regeneration !== undefined && raw.answer !== undefined) {
           generateAttempts += 1;
-          return { step: "generate", attempt: generateAttempts };
+          return {
+            step: "generate",
+            attempt: generateAttempts,
+            isRegeneration: raw.is_regeneration,
+            answer: raw.answer,
+          };
         }
         break;
       case "groundedness_check":
@@ -176,10 +211,16 @@ type EvalMetricResponse = {
   without_correction: number;
   delta: number;
 };
+type JudgeAgreementResponse = {
+  agreement_rate: number;
+  agreed: number;
+  total: number;
+};
 type EvalResultsResponse = {
   generated_at: string;
   sample: boolean;
   metrics: EvalMetricResponse[];
+  judge_agreement: JudgeAgreementResponse;
 };
 function toEvalResults(raw: EvalResultsResponse): EvalResults {
   return {
@@ -191,6 +232,11 @@ function toEvalResults(raw: EvalResultsResponse): EvalResults {
       withoutCorrection: m.without_correction,
       delta: m.delta,
     })),
+    judgeAgreement: {
+      agreementRate: raw.judge_agreement.agreement_rate,
+      agreed: raw.judge_agreement.agreed,
+      total: raw.judge_agreement.total,
+    },
   };
 }
 

@@ -1,5 +1,3 @@
-import type { RetrievedChunk } from "@/lib/types";
-
 const CITATION_PATTERN = /\[([^[\]]+)\]/g;
 
 function parseBracketIds(inner: string): string[] {
@@ -13,9 +11,11 @@ export type CitationSegment =
   | { type: "text"; value: string }
   | { type: "citation"; chunkIds: string[]; docNames: string[] };
 
+export type CitationSource = { chunkId: string; docName: string };
+
 export function splitCitations(
   content: string,
-  sources: RetrievedChunk[],
+  sources: CitationSource[],
 ): CitationSegment[] {
   const byId = new Map(sources.map((s) => [s.chunkId, s]));
 

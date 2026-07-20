@@ -11,7 +11,7 @@ from sse_starlette.sse import EventSourceResponse
 from app.chat_intent import answer_document_meta, answer_smalltalk, classify_intent
 from app.config import get_settings
 from app.graph.build import build_graph
-from app.models import ChatRequest, GraphState, TraceEntry
+from app.models import ChatRequest, GraphState, TracedChunk, TracedGrade, TraceEntry
 from app.rate_limit import RateLimiter
 
 logger = logging.getLogger(__name__)
@@ -68,11 +68,7 @@ async def _stream_graph_states(graph, initial_state: GraphState) -> AsyncIterato
 
 
 def _check_chat_rate_limit(request: Request) -> None:
-    # Indirection (rather than `Depends(_chat_rate_limiter)` directly) so
-    # tests can monkeypatch the module-level `_chat_rate_limiter` name and
-    # have it take effect: FastAPI resolves a Depends() target once, at
-    # route-definition time, so binding the object itself as the default
-    # would freeze in the original instance forever.
+
     _chat_rate_limiter(request)
 
 
@@ -80,6 +76,35 @@ def _cited_chunks(state: GraphState) -> list:
     relevant_ids = {g.chunk_id for g in state.grades if g.relevant}
     cited = [c for c in state.retrieved_chunks if c.chunk_id in relevant_ids]
     return cited or state.retrieved_chunks
+
+
+def _enrich_trace_entry(entry: TraceEntry, state: GraphState) -> TraceEntry:
+    """Joins a trace entry against the GraphState snapshot captured at the
+    moment it was appended, so the trace drawer gets doc_name/chunk_index and
+    the generated answer without the graph nodes themselves computing them —
+    serialization only, per CLAUDE.md rule 12a (grade/generate untouched)."""
+    if entry.node == "retrieve":
+        chunks = [
+            TracedChunk(chunk_id=c.chunk_id, doc_name=c.doc_name, chunk_index=c.chunk_index)
+            for c in state.retrieved_chunks
+        ]
+        return entry.model_copy(update={"chunks": chunks})
+    if entry.node == "grade" and entry.grades:
+        chunks_by_id = {c.chunk_id: c for c in state.retrieved_chunks}
+        graded_chunks = [
+            TracedGrade(
+                chunk_id=g.chunk_id,
+                doc_name=chunks_by_id[g.chunk_id].doc_name,
+                chunk_index=chunks_by_id[g.chunk_id].chunk_index,
+                relevant=g.relevant,
+                reason=g.reason,
+            )
+            for g in entry.grades
+        ]
+        return entry.model_copy(update={"graded_chunks": graded_chunks})
+    if entry.node == "generate":
+        return entry.model_copy(update={"answer": state.answer})
+    return entry
 
 
 def _tokenize(answer: str) -> list[str]:
@@ -115,11 +140,13 @@ async def _event_stream(request: ChatRequest) -> AsyncIterator[dict]:
 
         initial_state = GraphState(question=request.question, tenant_id=request.tenant_id)
         result = initial_state
+        trace_states: list[GraphState] = []
         seen_trace_len = 0
         async for state in _stream_graph_states(_graph, initial_state):
             result = state
             if len(state.trace) > seen_trace_len:
                 seen_trace_len = len(state.trace)
+                trace_states.append(state)
                 yield {"event": "stage", "data": json.dumps({"label": _stage_label(state.trace[-1])})}
 
         for token in _tokenize(result.answer):
@@ -128,12 +155,15 @@ async def _event_stream(request: ChatRequest) -> AsyncIterator[dict]:
         sources = [c.model_dump() for c in _cited_chunks(result)]
         yield {"event": "sources", "data": json.dumps(sources)}
 
+        enriched_entries = [
+            _enrich_trace_entry(entry, state) for entry, state in zip(result.trace, trace_states)
+        ]
         trace_payload = {
             "low_confidence": result.low_confidence,
             "rewrite_count": result.rewrite_count,
             "regenerated": result.regenerated,
             "skipped_pipeline": False,
-            "entries": [entry.model_dump(exclude_none=True) for entry in result.trace],
+            "entries": [entry.model_dump(exclude_none=True) for entry in enriched_entries],
         }
         yield {"event": "trace", "data": json.dumps(trace_payload)}
     except Exception:

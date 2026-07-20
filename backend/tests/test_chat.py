@@ -226,6 +226,55 @@ def test_chat_trace_entries_carry_structured_fields_and_omit_unused_ones(monkeyp
     assert groundedness_entry["unsupported_claims"] == []
 
 
+def test_chat_trace_entries_are_enriched_with_doc_identity_and_answer(monkeypatch):
+    """Serialization-layer enrichment (chat.py, not the graph nodes): trace
+    entries must carry doc_name/chunk_index per chunk and the generated
+    answer, joined from GraphState at serialization time."""
+    graph = build_graph(
+        search_fn=lambda tenant_id, query, k=6: [
+            ScoredChunk(
+                chunk_id="c1", tenant_id="t1", doc_id="d1", doc_name="handbook.txt",
+                chunk_index=0, text="policy text", score=1.0,
+            ),
+            ScoredChunk(
+                chunk_id="c2", tenant_id="t1", doc_id="d2", doc_name="benefits.txt",
+                chunk_index=3, text="other text", score=0.8,
+            ),
+        ],
+        grade_fn=lambda question, chunks: [
+            ChunkGrade(chunk_id="c1", relevant=True, reason="on topic"),
+            ChunkGrade(chunk_id="c2", relevant=False, reason="off topic"),
+        ],
+        generate_fn=lambda question, chunks, failure_reason=None: "paid time off accrues monthly",
+        check_fn=lambda answer, chunks: (True, "fully supported", []),
+    )
+    monkeypatch.setattr(chat_router, "_graph", graph)
+    monkeypatch.setattr(chat_router, "classify_intent", lambda question: "document_question")
+    api = TestClient(app)
+
+    response = api.post("/api/chat", json={"tenant_id": "t1", "question": "what is the pto policy"})
+
+    import json
+
+    trace_payload = json.loads(next(e["data"] for e in _parse_sse(response.text) if e["event"] == "trace"))
+    entries_by_node = {entry["node"]: entry for entry in trace_payload["entries"]}
+
+    retrieve_entry = entries_by_node["retrieve"]
+    assert retrieve_entry["chunks"] == [
+        {"chunk_id": "c1", "doc_name": "handbook.txt", "chunk_index": 0},
+        {"chunk_id": "c2", "doc_name": "benefits.txt", "chunk_index": 3},
+    ]
+
+    grade_entry = entries_by_node["grade"]
+    assert grade_entry["graded_chunks"] == [
+        {"chunk_id": "c1", "doc_name": "handbook.txt", "chunk_index": 0, "relevant": True, "reason": "on topic"},
+        {"chunk_id": "c2", "doc_name": "benefits.txt", "chunk_index": 3, "relevant": False, "reason": "off topic"},
+    ]
+
+    generate_entry = entries_by_node["generate"]
+    assert generate_entry["answer"] == "paid time off accrues monthly"
+
+
 def test_chat_emits_error_event_instead_of_dying_silently(monkeypatch, caplog):
     def _boom(question, chunks, failure_reason=None):
         raise RuntimeError("openai is down")

@@ -2,12 +2,25 @@ import { Badge } from "@/components/ui/badge";
 import { getEvalResults } from "@/lib/api";
 
 function formatPercent(value: number): string {
-  return `${Math.round(value * 100)}%`;
+  return `${(value * 100).toFixed(1)}%`;
 }
 
 function formatDelta(value: number): string {
-  const rounded = Math.round(value * 100);
-  return `${rounded >= 0 ? "+" : ""}${rounded}%`;
+  const pct = value * 100;
+  const sign = pct > 0 ? "+" : pct < 0 ? "-" : "+";
+  return `${sign}${Math.abs(pct).toFixed(1)}pp`;
+}
+
+// Correction ON regressed both metrics it moved on this corpus (see
+// RESULTS.md); a green "ok" chip on a negative delta would read as the
+// opposite of what happened. Only a genuinely positive delta earns --ok.
+// A drop of 2pp or more is called out in --danger rather than blended into
+// --muted with the small, likely-noise deltas.
+function deltaVariant(value: number): "ok" | "muted" | "danger" {
+  const pct = value * 100;
+  if (pct > 0) return "ok";
+  if (pct <= -2) return "danger";
+  return "muted";
 }
 
 export default async function EvalsPage() {
@@ -23,7 +36,9 @@ export default async function EvalsPage() {
         strictly to what the cited sources say, with nothing invented.
         Not-found honesty is how often the system correctly admits it
         doesn&apos;t know, instead of guessing, when the documents don&apos;t
-        have the answer.
+        have the answer. Judge agreement is a check on the checker: how
+        often the pipeline&apos;s own internal groundedness verdict agrees
+        with an independent eval judge looking at the same answer.
       </p>
 
       <div className="overflow-x-auto rounded-card border border-border bg-surface">
@@ -64,12 +79,32 @@ export default async function EvalsPage() {
                   {formatPercent(metric.withCorrection)}
                 </td>
                 <td className="px-5 py-4 text-right">
-                  <Badge variant="ok">{formatDelta(metric.delta)}</Badge>
+                  <Badge variant={deltaVariant(metric.delta)}>
+                    {formatDelta(metric.delta)}
+                  </Badge>
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
+      </div>
+
+      <div className="flex items-baseline justify-between gap-4 rounded-card border border-border bg-surface px-5 py-4">
+        <div>
+          <p className="font-serif text-body text-text">Judge agreement</p>
+          <p className="text-caption text-muted">
+            Independent eval judge vs. the pipeline&apos;s internal
+            groundedness check, correction ON only.
+          </p>
+        </div>
+        <div className="text-right">
+          <p className="font-serif text-body text-text">
+            {formatPercent(results.judgeAgreement.agreementRate)}
+          </p>
+          <p className="text-caption text-muted">
+            {results.judgeAgreement.agreed}/{results.judgeAgreement.total}
+          </p>
+        </div>
       </div>
 
       {results.sample && (

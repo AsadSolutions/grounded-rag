@@ -1,17 +1,19 @@
 import type { HTMLAttributes } from "react";
 
-type BadgeVariant = "ok" | "warn" | "danger";
+type BadgeVariant = "ok" | "warn" | "danger" | "muted";
 
 const dotColor: Record<BadgeVariant, string> = {
   ok: "bg-ok",
   warn: "bg-warn",
   danger: "bg-danger",
+  muted: "bg-muted",
 };
 
 const textColor: Record<BadgeVariant, string> = {
   ok: "text-ok",
   warn: "text-warn",
   danger: "text-danger",
+  muted: "text-muted",
 };
 
 type BadgeProps = HTMLAttributes<HTMLSpanElement> & {

@@ -111,9 +111,22 @@ const SCENARIOS: Record<string, Scenario[]> = {
         },
         {
           step: "grade",
-          grades: [{ chunkId: "chunk-handbook-014", relevant: true }],
+          grades: [
+            {
+              chunkId: "chunk-handbook-014",
+              docName: "Employee Handbook.pdf",
+              chunkIndex: 14,
+              relevant: true,
+            },
+          ],
         },
-        { step: "generate", attempt: 1 },
+        {
+          step: "generate",
+          attempt: 1,
+          isRegeneration: false,
+          answer:
+            "Employees accrue 1.25 days of paid time off per month. Unused days carry over into the next calendar year up to a cap of 10 days; anything beyond that is forfeited on January 1st. [chunk-handbook-014]",
+        },
         { step: "groundedness_check", verdict: "grounded" },
       ],
       rewriteCount: 1,
@@ -152,13 +165,25 @@ const SCENARIOS: Record<string, Scenario[]> = {
           chunks: [],
         },
         { step: "grade", grades: [] },
-        { step: "generate", attempt: 1 },
+        {
+          step: "generate",
+          attempt: 1,
+          isRegeneration: false,
+          answer:
+            "The founder and CEO receive a base salary of $180,000 and a 2% equity grant.",
+        },
         {
           step: "groundedness_check",
           verdict: "not_grounded",
           reason: "No retrieved chunks support any compensation claim.",
         },
-        { step: "generate", attempt: 2 },
+        {
+          step: "generate",
+          attempt: 2,
+          isRegeneration: true,
+          answer:
+            "Not found in the documents. The provided sources cover time off, data processing, and vendor contract terms, but do not mention compensation or equity figures.",
+        },
         { step: "groundedness_check", verdict: "not_grounded" },
       ],
       rewriteCount: 2,
@@ -181,9 +206,22 @@ const SCENARIOS: Record<string, Scenario[]> = {
         },
         {
           step: "grade",
-          grades: [{ chunkId: "chunk-onboarding-003", relevant: true }],
+          grades: [
+            {
+              chunkId: "chunk-onboarding-003",
+              docName: "Onboarding Guide.md",
+              chunkIndex: 3,
+              relevant: true,
+            },
+          ],
         },
-        { step: "generate", attempt: 1 },
+        {
+          step: "generate",
+          attempt: 1,
+          isRegeneration: false,
+          answer:
+            "New engineers receive read access to all repositories on day one, and write access after completing the security training module, typically by the end of week one. [chunk-onboarding-003]",
+        },
         { step: "groundedness_check", verdict: "grounded" },
       ],
       rewriteCount: 0,
@@ -208,9 +246,14 @@ function genericScenario(tenantId: string, question: string): Scenario {
       { step: "retrieve", query: question, chunks },
       {
         step: "grade",
-        grades: chunks.map((c) => ({ chunkId: c.chunkId, relevant: true })),
+        grades: chunks.map((c) => ({
+          chunkId: c.chunkId,
+          docName: c.docName,
+          chunkIndex: c.chunkIndex,
+          relevant: true,
+        })),
       },
-      { step: "generate", attempt: 1 },
+      { step: "generate", attempt: 1, isRegeneration: false, answer },
       {
         step: "groundedness_check",
         verdict: chunks.length > 0 ? "grounded" : "not_grounded",

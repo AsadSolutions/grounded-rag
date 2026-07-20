@@ -19,7 +19,8 @@
 [**Eval Results**](#evaluation-results) · [**Architecture**](#architecture) · [**Quickstart**](#quickstart)
 
 <!-- TODO: record and embed demo GIF here after deploy -->
-<!-- ![demo](assets/demo.gif) -->
+
+![demo](assets/demo.gif)
 
 </div>
 

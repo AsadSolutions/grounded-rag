@@ -28,6 +28,12 @@ Some prose about the run.
 | Metric             | Correction OFF (mean, min-max) | Correction ON (mean, min-max) | Delta (mean) |
 | ------------------- | ------------------------------- | ------------------------------ | ------------- |
 | Retrieval hit rate | 100.0% (100.0-100.0%)          | 100.0% (100.0-100.0%)         | +0.0pp       |
+
+### Judge agreement (independent eval judge vs. the pipeline's internal groundedness check, correction ON only)
+
+- Pass 1: 39/45 (86.7%)
+- Pass 2: 37/45 (82.2%)
+- Combined: 76/90 (84.4%)
 """
 
 
@@ -45,6 +51,9 @@ def test_parse_eval_results_extracts_overall_table_only():
     )
     assert result.metrics[2] == eval_router.EvalMetric(
         name="Not-found honesty", with_correction=1.0, without_correction=1.0, delta=0.0
+    )
+    assert result.judge_agreement == eval_router.JudgeAgreement(
+        agreement_rate=0.844, agreed=76, total=90
     )
 
 
