@@ -8,7 +8,10 @@
 <br/>
 
 **A multi tenant RAG engine that grades its own retrieval, rewrites failed queries, and verifies every answer against the sources before you ever see it.**
-
+<br/>
+<br/>
+<br/>
+<br/>
 [![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/)
 [![Next.js 15](https://img.shields.io/badge/Next.js-15-black)](https://nextjs.org/)
 [![LangGraph](https://img.shields.io/badge/LangGraph-orchestration-orange)](https://github.com/langchain-ai/langgraph)
